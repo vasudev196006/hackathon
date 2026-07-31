@@ -1162,39 +1162,58 @@ footer {
    ========================================================================== */
 @media (max-width: 768px) {
   .hero-content-container {
-    padding: 1rem 1rem 1.5rem;
+    padding: 0.85rem 0.85rem 1.25rem;
   }
 
   .brand-pill-wrapper {
-    flex-direction: column;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
     align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
     width: 100%;
+    margin-bottom: 1.5rem;
+    gap: 0.5rem;
   }
 
   .leftmost-brand-pill {
     margin-left: 0;
+    padding: 0.35rem 0.75rem 0.35rem 0.4rem;
+    flex-shrink: 0;
+  }
+
+  .brand-name {
+    font-size: 0.85rem;
   }
 
   .header-capsule-group {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.5rem;
-    width: 100%;
+    display: inline-flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.35rem;
+    flex-shrink: 0;
   }
 
   .map-capsule,
   .workstation-capsule {
-    padding: 0.45rem 0.95rem;
-    font-size: 0.78rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.38rem 0.75rem;
+    font-size: 0.72rem;
+    white-space: nowrap;
     border-radius: 9999px;
   }
 
   .map-capsule .location-pin-icon {
-    width: 14px !important;
-    height: 14px !important;
+    width: 13px !important;
+    height: 13px !important;
+  }
+
+  .workstation-capsule i,
+  .map-capsule i {
+    font-size: 0.7rem;
   }
 
   .hero-grid {
@@ -1279,5 +1298,21 @@ footer {
     left: 12px;
     width: auto;
     max-width: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .brand-name {
+    display: none;
+  }
+
+  .map-capsule,
+  .workstation-capsule {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.7rem;
+  }
+
+  .capsule-arrow {
+    display: none;
   }
 }
