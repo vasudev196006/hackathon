@@ -73,7 +73,7 @@ async def analyze_topic(req: AnalyzeRequest, db: Session = Depends(get_db)):
 
     if not existing_topic:
         # Mirror to Supabase if active
-        supabase_service.insert_topic(topic_title, topic_id=topic_id_str)
+        supabase_service.insert_topic(topic_title)
 
     # Step 2: Fetch YouTube videos & comments
     yt_data = youtube_service.fetch_videos_and_comments(topic_title, max_videos=10, max_comments_per_video=25)
@@ -153,8 +153,7 @@ async def analyze_topic(req: AnalyzeRequest, db: Session = Depends(get_db)):
         topic_id=topic_id_str,
         entropy=metrics["entropy"],
         volatility=metrics["volatility"],
-        classification=classification_state,
-        snapshot_id=str(snapshot.id)
+        classification=classification_state
     )
 
     # Step 8: Generate AI Executive Summary text

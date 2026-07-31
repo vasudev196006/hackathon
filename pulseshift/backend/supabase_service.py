@@ -32,13 +32,12 @@ class SupabaseService:
     def is_active(self) -> bool:
         return self.client is not None
 
-    def insert_topic(self, title: str, topic_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    def insert_topic(self, title: str) -> Optional[Dict[str, Any]]:
         if not self.is_active:
             return None
         try:
-            row_id = topic_id or str(uuid.uuid4())
             data = {
-                "id": row_id,
+                "id": str(uuid.uuid4()),
                 "title": title,
                 "created_at": datetime.utcnow().isoformat()
             }
@@ -56,8 +55,7 @@ class SupabaseService:
             now_iso = datetime.utcnow().isoformat()
             for v in videos:
                 item = dict(v)
-                if not item.get("id"):
-                    item["id"] = str(uuid.uuid4())
+                item["id"] = str(uuid.uuid4())
                 if not item.get("created_at"):
                     item["created_at"] = now_iso
                 payload.append(item)
@@ -75,8 +73,7 @@ class SupabaseService:
             now_iso = datetime.utcnow().isoformat()
             for c in comments:
                 item = dict(c)
-                if not item.get("id"):
-                    item["id"] = str(uuid.uuid4())
+                item["id"] = str(uuid.uuid4())
                 if not item.get("created_at"):
                     item["created_at"] = now_iso
                 payload.append(item)
@@ -86,12 +83,12 @@ class SupabaseService:
             logger.error(f"Supabase insert_comments error: {e}")
             return []
 
-    def insert_entropy_snapshot(self, topic_id: str, entropy: float, volatility: float, classification: str, snapshot_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    def insert_entropy_snapshot(self, topic_id: str, entropy: float, volatility: float, classification: str) -> Optional[Dict[str, Any]]:
         if not self.is_active:
             return None
         try:
             data = {
-                "id": snapshot_id or str(uuid.uuid4()),
+                "id": str(uuid.uuid4()),
                 "topic_id": topic_id,
                 "entropy": entropy,
                 "volatility": volatility,
@@ -112,8 +109,7 @@ class SupabaseService:
             now_iso = datetime.utcnow().isoformat()
             for art in articles:
                 item = dict(art)
-                if not item.get("id"):
-                    item["id"] = str(uuid.uuid4())
+                item["id"] = str(uuid.uuid4())
                 if not item.get("created_at"):
                     item["created_at"] = now_iso
                 payload.append(item)
