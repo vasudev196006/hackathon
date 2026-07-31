@@ -29,7 +29,7 @@ def serve_index():
     index_file = FRONTEND_DIR / "index.html"
     if index_file.exists():
         return FileResponse(index_file)
-    return HTMLResponse(content="<h1>Consensus Entropy Mapper API is running</h1>")
+    return HTMLResponse(content="<h1>PulseShift API is running</h1>")
 
 @router.get("/dashboard", response_class=HTMLResponse)
 def serve_dashboard():

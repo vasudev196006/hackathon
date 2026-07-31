@@ -28,26 +28,26 @@
 
     <div class="hero-content-container">
       
-      <!-- Top Brand Tag Pill (Replacing full header) -->
+      <!-- Top Header Wrapper: Leftmost Logo & Right Capsule -->
       <div class="brand-pill-wrapper animate-fade-in delay-100">
-        <a href="/" class="brand-pill">
-          <div class="brand-icon-sm">
-            <i class="fa-solid fa-chart-nodes"></i>
-          </div>
+        <a href="/" class="brand-pill leftmost-brand-pill">
+          <img src="/static/logo.png" alt="PulseShift Logo" class="brand-logo-img circular-logo" />
           <span class="brand-name">PulseShift</span>
-          <span class="brand-tag-dot"></span>
-          <span class="brand-tag-text">Consensus Intelligence</span>
         </a>
 
-        <div class="header-quick-links">
-          <a href="/dashboard" class="quick-nav-link"><i class="fa-solid fa-desktop"></i> Full Workstation</a>
-          <a href="/docs" target="_blank" class="quick-nav-link"><i class="fa-solid fa-code"></i> API</a>
+        <div class="header-capsule-group">
+          <a href="/dashboard" class="workstation-capsule">
+            <i class="fa-solid fa-desktop"></i>
+            <span>Full Workstation</span>
+            <i class="fa-solid fa-arrow-right capsule-arrow"></i>
+          </a>
         </div>
       </div>
 
-      <div class="hero-grid">
+      <!-- Hero Grid (Single Centered/Left-Aligned Hero Column) -->
+      <div class="hero-grid hero-single-col">
         
-        <!-- LEFT COLUMN -->
+        <!-- MAIN HERO CONTENT -->
         <div class="hero-left-col">
           <!-- Main Headline -->
           <h1 class="hero-title animate-fade-in delay-200">
@@ -60,9 +60,9 @@
             AI-powered Shannon entropy mapping and real-time consensus dynamics analyzing public commentary and protest trends.
           </p>
 
-          <!-- Compact Search Form -->
+          <!-- Compact Search Form with Liquid Glass -->
           <div class="animate-fade-in delay-400 search-cta-group">
-            <form id="hero-search-form" class="search-form">
+            <form id="hero-search-form" class="search-form liquid-glass-search">
               <i class="fa-solid fa-magnifying-glass search-icon"></i>
               <input 
                 type="text" 
@@ -72,7 +72,7 @@
                 required
                 autocomplete="off"
               />
-              <button type="submit" id="search-btn" class="btn-primary">
+              <button type="submit" id="search-btn" class="btn-primary liquid-glass-btn">
                 <span>Analyze</span>
                 <i class="fa-solid fa-arrow-right"></i>
               </button>
@@ -86,44 +86,6 @@
             <button class="chip" onclick="quickAnalyze('AI Regulation')">AI Regulation</button>
             <button class="chip" onclick="quickAnalyze('Farmers Tech Rights')">Farmers Rights</button>
             <button class="chip" onclick="quickAnalyze('Electric Vehicles')">EV Consensus</button>
-          </div>
-        </div>
-
-        <!-- RIGHT COLUMN (Compact Live Card) -->
-        <div class="hero-right-col">
-          <div class="glass-card compact-stats-card animate-fade-in delay-500">
-            <div class="compact-card-header">
-              <div class="live-pill">
-                <span class="pulse-indicator">
-                  <span class="pulse-ring"></span>
-                  <span class="pulse-core"></span>
-                </span>
-                LIVE PROTEST FEED
-              </div>
-              <span class="card-time-tag">Updated 2m ago</span>
-            </div>
-
-            <!-- News Feed Stream inside Hero -->
-            <div class="hero-protest-news-box">
-              <div id="protest-news-list" class="hero-news-list">
-                <div class="news-loading-skeleton">
-                  <i class="fa-solid fa-spinner fa-spin"></i> Loading live protest news...
-                </div>
-              </div>
-            </div>
-
-            <!-- Mini KPI Summary -->
-            <div class="compact-kpi-footer">
-              <div class="compact-stat">
-                <span class="stat-val text-amber-400">78%</span>
-                <span class="stat-lbl">Consensus Stability</span>
-              </div>
-              <div class="compact-stat-divider"></div>
-              <div class="compact-stat">
-                <span class="stat-val">150+</span>
-                <span class="stat-lbl">Rallies Monitored</span>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -152,16 +114,13 @@
           <i class="fa-solid fa-bolt text-amber-400"></i> Real-Time Consensus Engine
         </div>
         <h2 class="section-title">Consensus Workstation & Opinion Analytics</h2>
-        <p class="section-sub">Explore opinion entropy math, live protest feeds, and automated consensus classification.</p>
+        <p class="section-sub">Explore opinion entropy math and automated consensus classification.</p>
       </div>
 
       <!-- Navigation Tabs -->
       <div class="tabs-container">
         <button class="tab-btn active" onclick="switchTab('tab-preview')">
           <i class="fa-solid fa-chart-line"></i> Workstation KPI Summary
-        </button>
-        <button class="tab-btn" onclick="switchTab('tab-protest')">
-          <i class="fa-solid fa-bullhorn"></i> Live Protest Feed
         </button>
         <button class="tab-btn" onclick="switchTab('tab-engine')">
           <i class="fa-solid fa-calculator"></i> Shannon Entropy Engine
@@ -208,31 +167,20 @@
           </div>
         </div>
 
-        <!-- Interactive Call to Action Banner -->
+        <!-- Interactive Call to Action Banner inside Workstation Capsule -->
         <div class="glass-card workstation-cta-banner">
           <div class="banner-content">
             <h3>Ready to analyze custom topics or YouTube threads?</h3>
             <p>Launch the full interactive workstation with Supabase Realtime synchronization and Chart.js analytics.</p>
           </div>
-          <a href="/dashboard" class="btn-primary">
+          <a href="/dashboard" class="workstation-capsule workstation-capsule-lg">
+            <i class="fa-solid fa-desktop"></i>
             <span>Open Full Workstation</span>
-            <i class="fa-solid fa-arrow-right"></i>
+            <i class="fa-solid fa-arrow-right capsule-arrow"></i>
           </a>
         </div>
       </div>
 
-      <!-- TAB 2: LIVE PROTEST FEED -->
-      <div id="tab-protest" class="tab-content">
-        <div class="glass-card protest-feed-full">
-          <div class="feed-header">
-            <h3><i class="fa-solid fa-newspaper text-cyan-400"></i> Global Protest & Demonstration Monitor</h3>
-            <span class="feed-badge">Live NewsAPI Sync</span>
-          </div>
-          <div id="tab-protest-news-grid" class="protest-grid">
-            <div class="news-loading-skeleton"><i class="fa-solid fa-spinner fa-spin"></i> Fetching live news articles...</div>
-          </div>
-        </div>
-      </div>
 
       <!-- TAB 3: SHANNON ENTROPY MATH ENGINE -->
       <div id="tab-engine" class="tab-content">

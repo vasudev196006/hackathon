@@ -19,7 +19,7 @@ logging.basicConfig(
 logger = logging.getLogger("consensus_entropy")
 
 app = FastAPI(
-    title="Consensus Entropy Mapper API",
+    title="PulseShift API",
     description="AI-powered public opinion, Shannon Entropy, and consensus dynamics mapper",
     version="1.0.0"
 )
@@ -37,7 +37,7 @@ app.add_middleware(
 @app.on_event("startup")
 def startup_event():
     init_db()
-    logger.info("Consensus Entropy Mapper backend initialized successfully.")
+    logger.info("PulseShift backend initialized successfully.")
 
 # Mount Static Frontend Files
 BASE_DIR = Path(__file__).resolve().parent.parent
