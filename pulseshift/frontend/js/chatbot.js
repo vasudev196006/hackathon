@@ -147,9 +147,7 @@ class PulseShiftChatbot {
     this.messagesContainer.appendChild(typingDiv);
     this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
 
-    const apiUrl = (window.location.origin && window.location.origin.includes('8000'))
-      ? '/chat'
-      : 'http://localhost:8000/chat';
+    const apiUrl = '/chat';
 
     try {
       const activeTopic = window.currentTopicData?.topic?.title || null;
