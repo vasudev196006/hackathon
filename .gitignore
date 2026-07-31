@@ -1,9 +1,54 @@
-venv/
-__pycache__/
-*.pyc
-*.db
-backend/.env
+# ==========================================
+# PulseShift - Production .gitignore
+# ==========================================
+
+# Environment files & Secrets
 .env
-.DS_Store
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+pulseshift/.env
+pulseshift/backend/.env
+pulseshift/backend/.env.*
+!pulseshift/backend/.env.example
+
+# Python Byte-compiled / Cache files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+
+# Local Databases & SQLite
+*.db
+*.sqlite
+*.sqlite3
+consensus_entropy.db
+pulseshift/consensus_entropy.db
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv/
+
+# Logs & Temporary Files
+*.log
+logs/
+.system_generated/
+scratch/
+
+# IDE & OS Files
 .vscode/
 .idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Frontend / Node build artifacts
+node_modules/
+dist/
+build/
