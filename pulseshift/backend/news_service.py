@@ -248,14 +248,14 @@ class NewsService:
     async def fetch_google_news_rss(self, keyword: str, used_images: Optional[set] = None) -> List[Dict[str, Any]]:
         """
         Harvests real live news coverage directly from Google News RSS feed for any given keyword.
-        Requires zero API keys and returns real-time news articles with unique real-life photographs.
+        Requires zero API keys and returns real-time news articles strictly related to the keyword.
         """
         if used_images is None:
             used_images = set()
 
-        kw = keyword.strip() if keyword else "general"
-        encoded_kw = urllib.parse.quote(kw)
-        rss_url = f"https://news.google.com/rss/search?q={encoded_kw}&hl=en-IN&gl=IN&ceid=IN:en"
+        kw = keyword.strip() if keyword else "Public Policy"
+        encoded_kw = urllib.parse.quote(f'"{kw}"' if " " in kw else kw)
+        rss_url = f"https://news.google.com/rss/search?q={encoded_kw}&hl=en-US&gl=US&ceid=US:en"
 
         try:
             async with httpx.AsyncClient(timeout=8.0, follow_redirects=True) as client:
@@ -266,13 +266,20 @@ class NewsService:
 
                 root = ET.fromstring(resp.content)
                 articles = []
-                for idx, item in enumerate(root.findall(".//item")[:15]):
+                kw_tokens = set(k.lower() for k in kw.split() if len(k) > 2)
+
+                for idx, item in enumerate(root.findall(".//item")[:20]):
                     raw_title = item.findtext("title") or ""
                     parts = raw_title.rsplit(" - ", 1)
                     title = parts[0] if parts else raw_title
                     src_name = parts[1] if len(parts) > 1 else "Google News"
                     link = item.findtext("link") or "#"
                     pub_date = item.findtext("pubDate") or ""
+
+                    # Filter for relevance: ensure title matches at least one query token if tokens exist
+                    title_lower = title.lower()
+                    if kw_tokens and not any(t in title_lower for t in kw_tokens):
+                        continue
 
                     img_url = self._get_topic_image(kw, title, idx, used_images)
 
@@ -287,7 +294,7 @@ class NewsService:
                         "content": title
                     })
 
-                logger.info(f"Google News RSS fetched {len(articles)} real news items for '{kw}'")
+                logger.info(f"Google News RSS fetched {len(articles)} relevant news items for '{kw}'")
                 return articles
 
         except Exception as exc:
@@ -301,7 +308,7 @@ class NewsService:
         if used_images is None:
             used_images = set()
 
-        kw = keyword.strip().capitalize() if keyword else "Public Policy"
+        kw = keyword.strip().title() if keyword else "Public Policy"
         titles = [
             f"Global News Coverage: Shift in Sentiment & Market Dynamics Around {kw}",
             f"Policy Makers & Industry Experts Address Growing Debate on {kw}",
@@ -329,27 +336,36 @@ class NewsService:
     async def searchNews(self, keyword: str) -> List[Dict[str, Any]]:
         """
         Searches news articles for a given keyword using NewsAPI, Google News RSS, or dynamic fallback.
-        Ensures strict deduplication of real-life photographs across all returned articles.
+        Ensures strict relevance to the search query and deduplication of real-life photographs.
         """
-        kw = keyword.strip() if (keyword and keyword.strip()) else "protest"
+        kw = keyword.strip() if (keyword and keyword.strip()) else "Public Policy"
         used_images: set = set()
         
-        # 1. Try NewsAPI if key is set
+        # 1. Try NewsAPI if key is set (using relevancy sorting and qInTitle for strict topic matching)
         if settings.has_news_api_key:
             try:
-                params = {"q": kw, "sortBy": "publishedAt", "language": "en"}
+                params = {"qInTitle": kw, "sortBy": "relevancy", "language": "en"}
                 news_api_articles = await self._make_request("everything", params, used_images=used_images)
                 if news_api_articles:
                     return news_api_articles
+                # Retry with broader q if qInTitle returned 0
+                params = {"q": kw, "sortBy": "relevancy", "language": "en"}
+                news_api_articles = await self._make_request("everything", params, used_images=used_images)
+                if news_api_articles:
+                    # Filter for relevance to ensure articles contain query tokens
+                    kw_tokens = set(k.lower() for k in kw.split() if len(k) > 2)
+                    filtered = [a for a in news_api_articles if any(t in a.get('title', '').lower() for t in kw_tokens)] if kw_tokens else news_api_articles
+                    if filtered:
+                        return filtered
             except Exception as e:
                 logger.warning(f"NewsAPI query for '{kw}' failed: {e}")
 
-        # 2. Try Google News RSS for real live news articles
+        # 2. Try Google News RSS for real live news articles strictly related to keyword
         rss_articles = await self.fetch_google_news_rss(kw, used_images=used_images)
         if rss_articles:
             return rss_articles
 
-        # 3. Fallback to dynamic keyword coverage
+        # 3. Fallback to dynamic keyword-bound coverage
         return self.get_fallback_news(kw, used_images=used_images)
 
     async def getTopHeadlines(self, country: str = "us") -> List[Dict[str, Any]]:

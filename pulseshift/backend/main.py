@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 
 from backend.database import init_db
 from backend.routes import router
+from chatbot import chatbot_router
 
 # Configure logging
 logging.basicConfig(
@@ -42,12 +43,17 @@ def startup_event():
 # Mount Static Frontend Files
 BASE_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_DIR = BASE_DIR / "frontend"
+CHATBOT_DIR = BASE_DIR / "chatbot"
 
 if FRONTEND_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
 
+if CHATBOT_DIR.exists():
+    app.mount("/static/chatbot", StaticFiles(directory=str(CHATBOT_DIR)), name="chatbot_static")
+
 # Include API Routes
 app.include_router(router)
+app.include_router(chatbot_router)
 
 if __name__ == "__main__":
     import uvicorn

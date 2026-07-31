@@ -86,15 +86,15 @@ Generate a complete, intellectual, news-grounded Markdown response answering the
         prompt_text = self._build_prompt_payload(user_message, ctx)
 
         if self.api_key:
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                for model_name in self.model_candidates:
+            async with httpx.AsyncClient(timeout=3.0) as client:
+                for model_name in self.model_candidates[:2]:
                     try:
                         url = f"{self.BASE_URL}/{model_name}:generateContent?key={self.api_key}"
                         payload = {
                             "contents": [{"parts": [{"text": prompt_text}]}],
                             "generationConfig": {
                                 "temperature": 0.35,
-                                "maxOutputTokens": 2500
+                                "maxOutputTokens": 800
                             }
                         }
                         resp = await client.post(url, json=payload)
@@ -107,6 +107,8 @@ Generate a complete, intellectual, news-grounded Markdown response answering the
                                     return parts[0]["text"]
                         else:
                             logger.warning(f"Gemini API model {model_name} returned status {resp.status_code}: {resp.text[:100]}")
+                            if resp.status_code in (400, 401, 402, 429):
+                                break
                     except Exception as err:
                         logger.warning(f"Error calling Gemini model {model_name}: {err}")
 

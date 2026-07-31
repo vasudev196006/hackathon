@@ -98,8 +98,8 @@ Generate a complete, intellectual, news-grounded Markdown response answering the
         }
 
         if self.api_key:
-            async with httpx.AsyncClient(timeout=60.0) as client:
-                for model_name in self.model_candidates:
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                for model_name in ["tencent/hy3", "inclusionai/ling-3.0-flash:free"]:
                     try:
                         payload = {
                             "model": model_name,
@@ -115,11 +115,18 @@ Generate a complete, intellectual, news-grounded Markdown response answering the
                             data = resp.json()
                             choices = data.get("choices", [])
                             if choices and "message" in choices[0]:
-                                content = choices[0]["message"].get("content", "")
-                                if content and content.strip():
-                                    return content
+                                msg = choices[0]["message"]
+                                content = msg.get("content")
+                                if content and isinstance(content, str) and content.strip():
+                                    return content.strip()
+                                # Fallback to reasoning string if content is empty
+                                reasoning = msg.get("reasoning")
+                                if reasoning and isinstance(reasoning, str) and reasoning.strip():
+                                    return reasoning.strip()
                         else:
                             logger.warning(f"OpenRouter model {model_name} returned status {resp.status_code}: {resp.text[:100]}")
+                            if resp.status_code in (401, 402):
+                                break
                     except Exception as err:
                         logger.warning(f"Error calling OpenRouter model {model_name}: {err}")
 
@@ -133,6 +140,7 @@ Generate a complete, intellectual, news-grounded Markdown response answering the
         return self._generate_fallback_response(user_message, ctx)
 
     def _generate_fallback_response(self, user_message: str, ctx: Dict[str, Any]) -> str:
+        msg_lower = user_message.lower().strip()
         topic = ctx.get("topic_title") or "General Consensus"
         entropy = ctx.get("entropy") or ctx.get("entropy_score") or 0.85
         volatility = ctx.get("volatility") or ctx.get("volatility_index") or 0.25
@@ -141,13 +149,71 @@ Generate a complete, intellectual, news-grounded Markdown response answering the
         oppose_pct = ctx.get("oppose_pct") or ctx.get("oppose_ratio") or 20.0
         neutral_pct = ctx.get("neutral_pct") or ctx.get("neutral_ratio") or 15.0
 
+        # 1. Greetings (hi, hello, hey)
+        if msg_lower in {"hi", "hello", "hey", "greetings", "hi there", "hello there", "good morning", "good evening"}:
+            return (
+                f"Hello! 👋 I am **PulseShift AI Assistant**.\n\n"
+                f"I am actively monitoring public opinion dynamics for **\"{topic}\"**:\n"
+                f"- **Consensus State**: `{classification}`\n"
+                f"- **Public Stances**: **{support_pct}% Support** | **{oppose_pct}% Oppose** | **{neutral_pct}% Neutral**\n"
+                f"- **Information Entropy**: `{entropy} bits`\n\n"
+                f"How can I assist you today? Feel free to ask any question, explore opinion drivers, or analyze press reports!"
+            )
+
+        # 2. Entropy / Math queries
+        if "entropy" in msg_lower or "math" in msg_lower or "formula" in msg_lower:
+            return (
+                f"### 🧮 Shannon Information Entropy Analysis: **{topic}**\n\n"
+                f"Shannon Entropy $H(P)$ measures the uncertainty or dispersion of public opinion across distinct stances:\n\n"
+                f"$$H(P) = -\\sum_{{i=1}}^{{n}} p_i \\log_2(p_i)$$\n\n"
+                f"**Current System Calculations for \"{topic}\"**:\n"
+                f"- **Measured Entropy**: `{entropy} bits` (Classification: `{classification}`)\n"
+                f"- **Stance Distribution**: $P(\\text{{Support}}) = {support_pct/100:.2f}$, $P(\\text{{Oppose}}) = {oppose_pct/100:.2f}$, $P(\\text{{Neutral}}) = {neutral_pct/100:.2f}$\n"
+                f"- **Sentiment Volatility**: `Var(S) = {volatility}`\n\n"
+                f"Lower entropy ($H(P) < 1.0$) indicates strong stance convergence around a dominant perspective, whereas high entropy indicates polarization."
+            )
+
+        # 3. Disagreement / Division queries
+        if "disagree" in msg_lower or "friction" in msg_lower or "divide" in msg_lower or "why" in msg_lower:
+            return (
+                f"### ⚡ Public Opinion Friction Analysis: **{topic}**\n\n"
+                f"Public sentiment regarding **{topic}** currently shows a `{classification}` state with **{oppose_pct}% opposition** vs **{support_pct}% support**.\n\n"
+                f"**Key Disagreement Drivers**:\n"
+                f"1. **Factual Divergence**: Information asymmetry in press coverage regarding policy timelines and implementation feasibility.\n"
+                f"2. **Value Alignment**: Differences in underlying stakeholder principles regarding regulatory oversight vs economic impact.\n"
+                f"3. **Process Friction**: Public skepticism regarding enforcement mechanisms and institutional transparency."
+            )
+
+        # 4. News / Summary queries
+        if "news" in msg_lower or "summary" in msg_lower or "report" in msg_lower or "article" in msg_lower:
+            news_articles = ctx.get("news_articles") or ctx.get("news", [])
+            news_str = ""
+            if news_articles and isinstance(news_articles, list):
+                lines = []
+                for n in news_articles[:4]:
+                    if isinstance(n, dict):
+                        lines.append(f"- **{n.get('title', 'News Item')}** ({n.get('source', 'Press')})")
+                if lines:
+                    news_str = "\n\n**Latest Indexed Headlines**:\n" + "\n".join(lines)
+
+            return (
+                f"### 📰 Executive Consensus & Media Briefing: **{topic}**\n\n"
+                f"Synthesizing recent press reporting and public discourse metrics:\n"
+                f"- **Primary Stance**: **{support_pct}% Support** (Dominant)\n"
+                f"- **Opposing Share**: **{oppose_pct}% Oppose**\n"
+                f"- **Consensus Index**: `{classification}` (Entropy: `{entropy} bits`)"
+                f"{news_str}\n\n"
+                f"**Executive Takeaway**: Communication strategies should focus on addressing public concerns while providing transparent verification data."
+            )
+
+        # 5. General / Direct Question Answer Fallback
         return (
-            f"### 📰 OpenRouter Consensus Analysis: **{topic}**\n\n"
-            f"Public sentiment evaluation for **{topic}** (Tencent Hunyuan Model Engine):\n\n"
-            f"- **Consensus State**: `{classification}`\n"
-            f"- **Public Stances**: **{support_pct}% Support** | **{oppose_pct}% Oppose** | **{neutral_pct}% Neutral**\n"
-            f"- **Shannon Entropy**: `{entropy} bits` | **Volatility**: `{volatility}`\n\n"
-            f"Ask me to analyze supporting/opposing points, explain entropy math, give executive policy briefings, or synthesize news articles for **{topic}**!"
+            f"### 💡 PulseShift AI Response: **{user_message}**\n\n"
+            f"Regarding your query **\"{user_message}\"** in the context of **{topic}**:\n\n"
+            f"1. **Direct Answer**: Public commentary analysis indicates that discussions around **{topic}** exhibit `{classification}` dynamics with a Shannon Entropy of `{entropy} bits`.\n"
+            f"2. **Stance Overview**: Support stands at **{support_pct}%**, Opposition at **{oppose_pct}%**, and Neutral sentiment at **{neutral_pct}%**.\n"
+            f"3. **Sentiment Stability**: Volatility is measured at `{volatility}`, indicating consistent sentiment patterns across recent commentary.\n\n"
+            f"Let me know if you would like deeper mathematical breakdowns, policy implications, or media article citations!"
         )
 
 openrouter_service = OpenRouterService()

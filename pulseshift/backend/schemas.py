@@ -100,6 +100,7 @@ class ChatRequest(BaseModel):
     message: str = Field(..., description="User query or prompt string")
     topic_id: Optional[str] = Field(None, description="Optional topic UUID string")
     topic_title: Optional[str] = Field(None, description="Optional topic title string")
+    history: Optional[List[dict]] = Field(default_factory=list, description="Optional list of past chat messages")
     context: Optional[dict] = Field(default_factory=dict, description="Optional context dictionary")
 
 class ChatResponse(BaseModel):

@@ -1,5 +1,10 @@
+import sys
 import urllib.request
+import urllib.parse
 import json
+
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
 
 def test_news_images(query):
     url = f"http://localhost:8000/news?q={urllib.parse.quote(query)}"
