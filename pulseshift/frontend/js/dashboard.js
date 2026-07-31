@@ -2,9 +2,9 @@
    Consensus Entropy Mapper - Dashboard Logic & Data Fetching
    ========================================================= */
 
-const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-  ? "http://localhost:8000"
-  : "https://pulseshift.onrender.com";
+const API_BASE = window.location.origin.includes("netlify")
+  ? "https://pulseshift-ilve.onrender.com"
+  : window.location.origin;
 
 let currentTopicData = null;
 let allCommentsData = [];
