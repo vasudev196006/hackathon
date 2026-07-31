@@ -39,4 +39,8 @@ class Settings(BaseSettings):
     def has_openai_key(self) -> bool:
         return bool(self.OPENAI_API_KEY.strip())
 
+    @property
+    def has_news_api_key(self) -> bool:
+        return bool(self.NEWS_API_KEY.strip())
+
 settings = Settings()

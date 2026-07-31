@@ -70,4 +70,14 @@ class SupabaseService:
             logger.error(f"Supabase insert_entropy_snapshot error: {e}")
             return None
 
+    def insert_news_articles(self, articles: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        if not self.is_active or not articles:
+            return []
+        try:
+            res = self.client.table("news_articles").insert(articles).execute()
+            return res.data or []
+        except Exception as e:
+            logger.error(f"Supabase insert_news_articles error: {e}")
+            return []
+
 supabase_service = SupabaseService()

@@ -16,6 +16,25 @@ class TopicModel(Base):
     videos = relationship("VideoModel", back_populates="topic", cascade="all, delete-orphan")
     comments = relationship("CommentModel", back_populates="topic", cascade="all, delete-orphan")
     entropy_snapshots = relationship("EntropySnapshotModel", back_populates="topic", cascade="all, delete-orphan")
+    news_articles = relationship("NewsArticleModel", back_populates="topic", cascade="all, delete-orphan")
+
+
+class NewsArticleModel(Base):
+    __tablename__ = "news_articles"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    topic_id = Column(UUID(as_uuid=True), ForeignKey("topics.id", ondelete="CASCADE"), nullable=True)
+    title = Column(String(500), nullable=False)
+    description = Column(Text, nullable=True)
+    source = Column(String(255), nullable=True)
+    author = Column(String(255), nullable=True)
+    published_at = Column(String(100), nullable=True)
+    url = Column(Text, nullable=True)
+    url_to_image = Column(Text, nullable=True)
+    content = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    topic = relationship("TopicModel", back_populates="news_articles")
 
 
 class VideoModel(Base):

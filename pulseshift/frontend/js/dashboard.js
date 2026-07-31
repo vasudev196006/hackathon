@@ -240,11 +240,26 @@ function renderNewsArticles(articles) {
 
   if (badge) badge.textContent = `${articles.length} Coverage Articles`;
 
+  const fallbackImages = [
+    'https://images.unsplash.com/photo-1575517111478-7f6ab0973db2?w=600&q=80',  // Street protest crowd
+    'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&q=80',  // Press microphones
+    'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=600&q=80',  // University students
+    'https://images.unsplash.com/photo-1569000971915-6a02b8d003b5?w=600&q=80',  // Street march rally
+    'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=600&q=80',  // Journalist notes
+    'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&q=80',  // Student taking exam
+    'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600&q=80',  // Courthouse statue
+    'https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=600&q=80',  // Youth rally avenue
+    'https://images.unsplash.com/photo-1588681664899-f142ff2dc9b1?w=600&q=80',  // Reporter on scene
+    'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=600&q=80',  // Laptop tech screen
+    'https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=600&q=80',  // Wind turbines
+    'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&q=80'   // Stock chart
+  ];
+
   let html = '';
-  articles.forEach(art => {
-    const imgTag = art.urlToImage 
-      ? `<img src="${escapeHtml(art.urlToImage)}" alt="News image" class="news-img" onerror="this.style.display='none'"/>` 
-      : '';
+  articles.forEach((art, idx) => {
+    const fallbackSrc = fallbackImages[idx % fallbackImages.length];
+    const imgSrc = art.urlToImage || fallbackSrc;
+    const imgTag = `<img src="${escapeHtml(imgSrc)}" alt="News image" class="news-img" onerror="this.onerror=null; this.src='${fallbackSrc}';"/>`;
     const dateStr = art.publishedAt ? new Date(art.publishedAt).toLocaleDateString() : '';
 
     html += `

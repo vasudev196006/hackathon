@@ -46,8 +46,24 @@ CREATE TABLE IF NOT EXISTS entropy_snapshots (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 5. News Articles Table
+CREATE TABLE IF NOT EXISTS news_articles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    topic_id UUID REFERENCES topics(id) ON DELETE CASCADE,
+    title VARCHAR(500) NOT NULL,
+    description TEXT,
+    source VARCHAR(255),
+    author VARCHAR(255),
+    published_at VARCHAR(100),
+    url TEXT,
+    url_to_image TEXT,
+    content TEXT,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_videos_topic ON videos(topic_id);
 CREATE INDEX IF NOT EXISTS idx_comments_topic ON comments(topic_id);
 CREATE INDEX IF NOT EXISTS idx_comments_stance ON comments(stance);
 CREATE INDEX IF NOT EXISTS idx_entropy_snapshots_topic ON entropy_snapshots(topic_id);
+CREATE INDEX IF NOT EXISTS idx_news_articles_topic ON news_articles(topic_id);

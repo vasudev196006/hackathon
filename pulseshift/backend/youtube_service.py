@@ -177,7 +177,9 @@ class YouTubeService:
         authors = ["Alex Rivera", "Devon Vance", "Sarah Chen", "Marcus Brody", "Elena Rostova", "Dr. James Vance", "TechEnthusiast99", "CryptoMinerX", "PolicyObserver", "Clara Oswald", "David K.", "Maya Lin"]
 
         for vid in videos:
-            for _ in range(random.randint(15, comments_per_video)):
+            min_c = min(5, max(1, comments_per_video))
+            max_c = max(min_c, comments_per_video)
+            for _ in range(random.randint(min_c, max_c)):
                 roll = random.random()
                 if roll < 0.45:
                     tmpl = random.choice(support_templates)

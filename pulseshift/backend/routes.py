@@ -1,13 +1,15 @@
 import uuid
 import logging
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import HTMLResponse, FileResponse
 from sqlalchemy.orm import Session
 from pathlib import Path
 
 from backend.database import get_db
-from backend.models import TopicModel, VideoModel, CommentModel, EntropySnapshotModel
+from backend.models import TopicModel, VideoModel, CommentModel, EntropySnapshotModel, NewsArticleModel
+
+# (Note: In routes.py imports, update import line for models)
 from backend.schemas import TopicResponse, CommentResponse, EntropySnapshotResponse, DashboardMetrics, AnalyzeRequest
 from backend.youtube_service import youtube_service
 from backend.ai_service import ai_service
@@ -165,12 +167,60 @@ async def analyze_topic(req: AnalyzeRequest, db: Session = Depends(get_db)):
     # Fetch all historical snapshots for time series chart
     snapshots = db.query(EntropySnapshotModel).filter(EntropySnapshotModel.topic_id == topic_record.id).order_by(EntropySnapshotModel.created_at.asc()).all()
 
-    # Step 9: Fetch related news articles via NewsAPI
+    # Step 9: Fetch and persist related news articles in Database
     try:
-        news_articles = await news_service.searchNews(topic_title)
+        raw_news = await news_service.searchNews(topic_title)
     except Exception as exc:
         logger.warning(f"Could not fetch news articles for '{topic_title}': {exc}")
-        news_articles = []
+        raw_news = []
+
+    # Clear previous news records for this topic
+    db.query(NewsArticleModel).filter(NewsArticleModel.topic_id == topic_record.id).delete()
+    
+    db_news_records = []
+    supabase_news_payload = []
+    for art in raw_news:
+        n_model = NewsArticleModel(
+            topic_id=topic_record.id,
+            title=art.get("title", "Untitled"),
+            description=art.get("description", ""),
+            source=art.get("source", "Unknown"),
+            author=art.get("author", "Unknown"),
+            published_at=art.get("publishedAt", ""),
+            url=art.get("url", ""),
+            url_to_image=art.get("urlToImage", ""),
+            content=art.get("content", "")
+        )
+        db.add(n_model)
+        db_news_records.append(n_model)
+        supabase_news_payload.append({
+            "topic_id": str(topic_record.id),
+            "title": art.get("title", "Untitled"),
+            "description": art.get("description", ""),
+            "source": art.get("source", "Unknown"),
+            "author": art.get("author", "Unknown"),
+            "published_at": art.get("publishedAt", ""),
+            "url": art.get("url", ""),
+            "url_to_image": art.get("urlToImage", "")
+        })
+
+    db.commit()
+
+    # Mirror to Supabase if active
+    supabase_service.insert_news_articles(supabase_news_payload)
+
+    news_payload = [
+        {
+            "title": n.title,
+            "description": n.description or "",
+            "source": n.source or "Unknown",
+            "author": n.author or "Unknown",
+            "publishedAt": n.published_at or "",
+            "url": n.url or "",
+            "urlToImage": n.url_to_image or "",
+            "content": n.content or ""
+        } for n in db_news_records
+    ]
 
     return DashboardMetrics(
         topic=TopicResponse.model_validate(topic_record),
@@ -187,7 +237,7 @@ async def analyze_topic(req: AnalyzeRequest, db: Session = Depends(get_db)):
         ai_summary=ai_summary_text,
         latest_snapshots=[EntropySnapshotResponse.model_validate(s) for s in snapshots],
         top_comments=[CommentResponse.model_validate(c) for c in db_comments[:50]],
-        news_articles=news_articles
+        news_articles=news_payload
     )
 
 @router.get("/topics", response_model=List[TopicResponse])
@@ -204,6 +254,7 @@ async def get_topic_details(topic_id: uuid.UUID, db: Session = Depends(get_db)):
     comments = db.query(CommentModel).filter(CommentModel.topic_id == topic_id).all()
     videos_count = db.query(VideoModel).filter(VideoModel.topic_id == topic_id).count()
     snapshots = db.query(EntropySnapshotModel).filter(EntropySnapshotModel.topic_id == topic_id).order_by(EntropySnapshotModel.created_at.asc()).all()
+    stored_news = db.query(NewsArticleModel).filter(NewsArticleModel.topic_id == topic_id).all()
 
     c_dicts = [{
         "stance": c.stance,
@@ -231,11 +282,53 @@ async def get_topic_details(topic_id: uuid.UUID, db: Session = Depends(get_db)):
         reasons_breakdown=metrics["reasons_breakdown"]
     )
 
-    try:
-        news_articles = await news_service.searchNews(topic_record.title)
-    except Exception as exc:
-        logger.warning(f"Could not fetch news articles for '{topic_record.title}': {exc}")
-        news_articles = []
+    if stored_news:
+        news_payload = [
+            {
+                "title": n.title,
+                "description": n.description or "",
+                "source": n.source or "Unknown",
+                "author": n.author or "Unknown",
+                "publishedAt": n.published_at or "",
+                "url": n.url or "",
+                "urlToImage": n.url_to_image or "",
+                "content": n.content or ""
+            } for n in stored_news
+        ]
+    else:
+        try:
+            raw_news = await news_service.searchNews(topic_record.title)
+            db_news_records = []
+            for art in raw_news:
+                n_model = NewsArticleModel(
+                    topic_id=topic_record.id,
+                    title=art.get("title", "Untitled"),
+                    description=art.get("description", ""),
+                    source=art.get("source", "Unknown"),
+                    author=art.get("author", "Unknown"),
+                    published_at=art.get("publishedAt", ""),
+                    url=art.get("url", ""),
+                    url_to_image=art.get("urlToImage", ""),
+                    content=art.get("content", "")
+                )
+                db.add(n_model)
+                db_news_records.append(n_model)
+            db.commit()
+            news_payload = [
+                {
+                    "title": n.title,
+                    "description": n.description or "",
+                    "source": n.source or "Unknown",
+                    "author": n.author or "Unknown",
+                    "publishedAt": n.published_at or "",
+                    "url": n.url or "",
+                    "urlToImage": n.url_to_image or "",
+                    "content": n.content or ""
+                } for n in db_news_records
+            ]
+        except Exception as exc:
+            logger.warning(f"Could not fetch news articles for '{topic_record.title}': {exc}")
+            news_payload = []
 
     return DashboardMetrics(
         topic=TopicResponse.model_validate(topic_record),
@@ -252,7 +345,7 @@ async def get_topic_details(topic_id: uuid.UUID, db: Session = Depends(get_db)):
         ai_summary=ai_summary_text,
         latest_snapshots=[EntropySnapshotResponse.model_validate(s) for s in snapshots],
         top_comments=[CommentResponse.model_validate(c) for c in comments[:50]],
-        news_articles=news_articles
+        news_articles=news_payload
     )
 
 @router.get("/comments/{topic_id}", response_model=List[CommentResponse])
@@ -266,19 +359,23 @@ def get_topic_entropy_snapshots(topic_id: uuid.UUID, db: Session = Depends(get_d
     return snapshots
 
 @router.get("/news")
-async def search_news(q: str):
+async def search_news(q: Optional[str] = None, category: Optional[str] = None, country: Optional[str] = None, event: Optional[str] = None):
     """
-    GET /news?q=<keyword>
-    Fetches news articles matching keyword query using NewsAPI service.
-    Returns clean JSON.
+    GET /news?q=<keyword>&category=<cat>&country=<cc>&event=<evt>
+    Flexible news endpoint supporting searchNews, getTopHeadlines, searchByCategory, and searchEvent.
+    Returns clean JSON array of normalized articles.
     """
-    query = q.strip() if q else ""
-    if not query:
-        raise HTTPException(status_code=400, detail="Query parameter 'q' is required.")
-
     try:
-        articles = await news_service.searchNews(query)
-        return articles
+        if event and event.strip():
+            return await news_service.searchEvent(event.strip())
+        elif category and category.strip():
+            return await news_service.searchByCategory(category.strip())
+        elif country and country.strip():
+            return await news_service.getTopHeadlines(country.strip())
+        elif q and q.strip():
+            return await news_service.searchNews(q.strip())
+        else:
+            return await news_service.searchNews("general")
     except NewsServiceError as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
     except Exception as e:
