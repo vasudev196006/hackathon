@@ -1156,3 +1156,128 @@ footer {
   color: var(--text-dim);
   border-top: 1px solid var(--border-glass);
 }
+
+/* ==========================================================================
+   Mobile Responsive Optimizations for Hero & Header Capsules (Desktop Unchanged)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .hero-content-container {
+    padding: 1rem 1rem 1.5rem;
+  }
+
+  .brand-pill-wrapper {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    width: 100%;
+  }
+
+  .leftmost-brand-pill {
+    margin-left: 0;
+  }
+
+  .header-capsule-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .map-capsule,
+  .workstation-capsule {
+    padding: 0.45rem 0.95rem;
+    font-size: 0.78rem;
+    border-radius: 9999px;
+  }
+
+  .map-capsule .location-pin-icon {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  .hero-grid {
+    align-items: center;
+    text-align: center;
+    margin: 0 auto;
+  }
+
+  .hero-left-col {
+    align-items: center;
+    text-align: center;
+    gap: 0.75rem;
+  }
+
+  .hero-title {
+    font-size: 1.85rem;
+    line-height: 1.2;
+    text-align: center;
+  }
+
+  .hero-title br {
+    display: none;
+  }
+
+  .hero-subtitle {
+    font-size: 0.875rem;
+    text-align: center;
+    margin: 0 auto 0.5rem;
+  }
+
+  .search-form,
+  .liquid-glass-search {
+    flex-direction: column;
+    border-radius: 20px;
+    padding: 0.6rem;
+    gap: 0.6rem;
+    width: 100%;
+  }
+
+  .search-icon {
+    display: none;
+  }
+
+  .search-input {
+    width: 100%;
+    text-align: center;
+    padding: 0.6rem 0.85rem;
+    font-size: 0.85rem;
+  }
+
+  .search-btn {
+    width: 100%;
+    justify-content: center;
+    border-radius: 14px;
+    padding: 0.65rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .floating-map-btn {
+    bottom: 20px;
+    left: 16px;
+    width: 50px;
+    height: 50px;
+  }
+
+  .floating-map-btn svg,
+  .floating-map-btn .location-pin-icon {
+    width: 22px !important;
+    height: 22px !important;
+  }
+
+  .chatbot-toggle-btn {
+    bottom: 20px;
+    right: 16px;
+    width: 50px;
+    height: 50px;
+  }
+
+  .chatbot-modal {
+    bottom: 80px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+    max-width: none;
+  }
+}
