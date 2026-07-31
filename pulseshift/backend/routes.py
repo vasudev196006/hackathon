@@ -67,11 +67,12 @@ async def analyze_topic(req: AnalyzeRequest, db: Session = Depends(get_db)):
         db.add(topic_record)
         db.commit()
         db.refresh(topic_record)
-        
-        # Mirror to Supabase if active
-        supabase_service.insert_topic(topic_title)
 
     topic_id_str = str(topic_record.id)
+
+    if not existing_topic:
+        # Mirror to Supabase if active
+        supabase_service.insert_topic(topic_title, topic_id=topic_id_str)
 
     # Step 2: Fetch YouTube videos & comments
     yt_data = youtube_service.fetch_videos_and_comments(topic_title, max_videos=10, max_comments_per_video=25)

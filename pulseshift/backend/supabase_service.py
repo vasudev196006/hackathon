@@ -1,4 +1,5 @@
 import logging
+import uuid
 from typing import Optional, Dict, Any, List
 from .config import settings
 
@@ -30,11 +31,12 @@ class SupabaseService:
     def is_active(self) -> bool:
         return self.client is not None
 
-    def insert_topic(self, title: str) -> Optional[Dict[str, Any]]:
+    def insert_topic(self, title: str, topic_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
         if not self.is_active:
             return None
         try:
-            res = self.client.table("topics").insert({"title": title}).execute()
+            row_id = topic_id or str(uuid.uuid4())
+            res = self.client.table("topics").insert({"id": row_id, "title": title}).execute()
             return res.data[0] if res.data else None
         except Exception as e:
             logger.error(f"Supabase insert_topic error: {e}")
@@ -44,7 +46,13 @@ class SupabaseService:
         if not self.is_active or not videos:
             return []
         try:
-            res = self.client.table("videos").insert(videos).execute()
+            payload = []
+            for v in videos:
+                item = dict(v)
+                if not item.get("id"):
+                    item["id"] = str(uuid.uuid4())
+                payload.append(item)
+            res = self.client.table("videos").insert(payload).execute()
             return res.data or []
         except Exception as e:
             logger.error(f"Supabase insert_videos error: {e}")
@@ -54,17 +62,24 @@ class SupabaseService:
         if not self.is_active or not comments:
             return []
         try:
-            res = self.client.table("comments").insert(comments).execute()
+            payload = []
+            for c in comments:
+                item = dict(c)
+                if not item.get("id"):
+                    item["id"] = str(uuid.uuid4())
+                payload.append(item)
+            res = self.client.table("comments").insert(payload).execute()
             return res.data or []
         except Exception as e:
             logger.error(f"Supabase insert_comments error: {e}")
             return []
 
-    def insert_entropy_snapshot(self, topic_id: str, entropy: float, volatility: float, classification: str) -> Optional[Dict[str, Any]]:
+    def insert_entropy_snapshot(self, topic_id: str, entropy: float, volatility: float, classification: str, snapshot_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
         if not self.is_active:
             return None
         try:
             data = {
+                "id": snapshot_id or str(uuid.uuid4()),
                 "topic_id": topic_id,
                 "entropy": entropy,
                 "volatility": volatility,
@@ -80,7 +95,13 @@ class SupabaseService:
         if not self.is_active or not articles:
             return []
         try:
-            res = self.client.table("news_articles").insert(articles).execute()
+            payload = []
+            for art in articles:
+                item = dict(art)
+                if not item.get("id"):
+                    item["id"] = str(uuid.uuid4())
+                payload.append(item)
+            res = self.client.table("news_articles").insert(payload).execute()
             return res.data or []
         except Exception as e:
             logger.error(f"Supabase insert_news_articles error: {e}")
