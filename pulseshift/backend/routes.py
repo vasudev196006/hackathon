@@ -2,10 +2,26 @@ import uuid
 import logging
 import asyncio
 from typing import List, Dict, Any, Optional
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import HTMLResponse, FileResponse
 from sqlalchemy.orm import Session
 from pathlib import Path
+
+def parse_date(date_str: Optional[str]) -> Optional[datetime]:
+    if not date_str:
+        return None
+    date_str = date_str.strip()
+    try:
+        if date_str.endswith('Z'):
+            date_str = date_str[:-1] + '+00:00'
+        return datetime.fromisoformat(date_str)
+    except Exception:
+        try:
+            from dateutil.parser import parse as date_parse
+            return date_parse(date_str)
+        except Exception:
+            return datetime.utcnow()
 
 from database import get_db
 from models import TopicModel, VideoModel, CommentModel, EntropySnapshotModel, NewsArticleModel
@@ -64,13 +80,13 @@ async def analyze_topic(req: AnalyzeRequest, db: Session = Depends(get_db)):
     if existing_topic:
         topic_record = existing_topic
     else:
-        topic_record = TopicModel(title=topic_title)
+        topic_record = TopicModel(title=topic_title, search_query=topic_title)
         db.add(topic_record)
         db.commit()
         db.refresh(topic_record)
         
         # Mirror to Supabase if active
-        supabase_service.insert_topic(topic_title)
+        supabase_service.insert_topic(topic_title, topic_id=str(topic_record.id), search_query=topic_title)
 
     topic_id_str = str(topic_record.id)
 
@@ -115,7 +131,8 @@ async def analyze_topic(req: AnalyzeRequest, db: Session = Depends(get_db)):
             score=c.get("score", 0.0),
             reason=c.get("reason", "facts"),
             emotion=c.get("emotion", "Neutral"),
-            confidence=c.get("confidence", 0.8)
+            confidence=c.get("confidence", 0.8),
+            entropy_weight=1.0
         )
         db.add(c_model)
         db_comments.append(c_model)
@@ -143,15 +160,29 @@ async def analyze_topic(req: AnalyzeRequest, db: Session = Depends(get_db)):
         classification=classification_state
     )
     db.add(snapshot)
+    
+    # Update topic metrics in local DB
+    topic_record.search_query = topic_title
+    topic_record.entropy_score = metrics["entropy"]
+    topic_record.volatility_score = metrics["volatility"]
+    topic_record.consensus_status = classification_state
+    
     db.commit()
     db.refresh(snapshot)
 
-    # Mirror snapshot to Supabase Realtime table if active
+    # Mirror snapshot & topic metrics to Supabase if active
     supabase_service.insert_entropy_snapshot(
         topic_id=topic_id_str,
         entropy=metrics["entropy"],
         volatility=metrics["volatility"],
         classification=classification_state
+    )
+    supabase_service.update_topic(
+        topic_id=topic_id_str,
+        search_query=topic_title,
+        entropy_score=metrics["entropy"],
+        volatility_score=metrics["volatility"],
+        consensus_status=classification_state
     )
 
     # Step 8: Generate AI Executive Summary text
@@ -183,28 +214,31 @@ async def analyze_topic(req: AnalyzeRequest, db: Session = Depends(get_db)):
     db_news_records = []
     supabase_news_payload = []
     for art in raw_news:
+        parsed_pub = parse_date(art.get("publishedAt", ""))
         n_model = NewsArticleModel(
             topic_id=topic_record.id,
             title=art.get("title", "Untitled"),
             description=art.get("description", ""),
             source=art.get("source", "Unknown"),
             author=art.get("author", "Unknown"),
-            published_at=art.get("publishedAt", ""),
+            published_at=parsed_pub,
             url=art.get("url", ""),
             url_to_image=art.get("urlToImage", ""),
-            content=art.get("content", "")
+            content=art.get("content", ""),
+            stance="neutral"
         )
         db.add(n_model)
         db_news_records.append(n_model)
         supabase_news_payload.append({
             "topic_id": str(topic_record.id),
             "title": art.get("title", "Untitled"),
-            "description": art.get("description", ""),
-            "source": art.get("source", "Unknown"),
+            "snippet": art.get("description", ""),
+            "source_name": art.get("source", "Unknown"),
             "author": art.get("author", "Unknown"),
-            "published_at": art.get("publishedAt", ""),
+            "published_at": art.get("publishedAt", "") or None,
             "url": art.get("url", ""),
-            "url_to_image": art.get("urlToImage", "")
+            "image_url": art.get("urlToImage", ""),
+            "stance": "neutral"
         })
 
     db.commit()
@@ -218,7 +252,7 @@ async def analyze_topic(req: AnalyzeRequest, db: Session = Depends(get_db)):
             "description": n.description or "",
             "source": n.source or "Unknown",
             "author": n.author or "Unknown",
-            "publishedAt": n.published_at or "",
+            "publishedAt": n.published_at.isoformat() if hasattr(n.published_at, "isoformat") else (n.published_at or ""),
             "url": n.url or "",
             "urlToImage": n.url_to_image or "",
             "content": n.content or ""
@@ -303,16 +337,18 @@ async def get_topic_details(topic_id: uuid.UUID, db: Session = Depends(get_db)):
             raw_news = await news_service.searchNews(topic_record.title)
             db_news_records = []
             for art in raw_news:
+                parsed_pub = parse_date(art.get("publishedAt", ""))
                 n_model = NewsArticleModel(
                     topic_id=topic_record.id,
                     title=art.get("title", "Untitled"),
                     description=art.get("description", ""),
                     source=art.get("source", "Unknown"),
                     author=art.get("author", "Unknown"),
-                    published_at=art.get("publishedAt", ""),
+                    published_at=parsed_pub,
                     url=art.get("url", ""),
                     url_to_image=art.get("urlToImage", ""),
-                    content=art.get("content", "")
+                    content=art.get("content", ""),
+                    stance="neutral"
                 )
                 db.add(n_model)
                 db_news_records.append(n_model)
@@ -323,7 +359,7 @@ async def get_topic_details(topic_id: uuid.UUID, db: Session = Depends(get_db)):
                     "description": n.description or "",
                     "source": n.source or "Unknown",
                     "author": n.author or "Unknown",
-                    "publishedAt": n.published_at or "",
+                    "publishedAt": n.published_at.isoformat() if hasattr(n.published_at, "isoformat") else (n.published_at or ""),
                     "url": n.url or "",
                     "urlToImage": n.url_to_image or "",
                     "content": n.content or ""

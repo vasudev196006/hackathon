@@ -24,14 +24,35 @@ class SupabaseService:
     def is_active(self) -> bool:
         return self.client is not None
 
-    def insert_topic(self, title: str) -> Optional[Dict[str, Any]]:
+    def insert_topic(self, title: str, topic_id: Optional[str] = None, search_query: Optional[str] = None) -> Optional[Dict[str, Any]]:
         if not self.is_active:
             return None
         try:
-            res = self.client.table("topics").insert({"title": title}).execute()
+            payload = {"title": title}
+            if topic_id:
+                payload["id"] = topic_id
+            if search_query:
+                payload["search_query"] = search_query
+            res = self.client.table("topics").insert(payload).execute()
             return res.data[0] if res.data else None
         except Exception as e:
             logger.error(f"Supabase insert_topic error: {e}")
+            return None
+
+    def update_topic(self, topic_id: str, search_query: str, entropy_score: float, volatility_score: float, consensus_status: str) -> Optional[Dict[str, Any]]:
+        if not self.is_active:
+            return None
+        try:
+            payload = {
+                "search_query": search_query,
+                "entropy_score": entropy_score,
+                "volatility_score": volatility_score,
+                "consensus_status": consensus_status
+            }
+            res = self.client.table("topics").update(payload).eq("id", topic_id).execute()
+            return res.data[0] if res.data else None
+        except Exception as e:
+            logger.error(f"Supabase update_topic error: {e}")
             return None
 
     def insert_videos(self, videos: List[Dict[str, Any]]) -> List[Dict[str, Any]]:

@@ -102,6 +102,7 @@ class ChatRequest(BaseModel):
     topic_title: Optional[str] = Field(None, description="Optional topic title string")
     history: Optional[List[dict]] = Field(default_factory=list, description="Optional list of past chat messages")
     context: Optional[dict] = Field(default_factory=dict, description="Optional context dictionary")
+    conversation_id: Optional[str] = Field(None, description="Unique session conversation identifier")
 
 class ChatResponse(BaseModel):
     reply: str = Field(..., description="Gemini AI generated reply text (supports markdown)")

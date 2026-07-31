@@ -1,14 +1,20 @@
 import logging
 import sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 
-from database import init_db
+from database import init_db, get_db
 from routes import router
 from chatbot import chatbot_router
+from config import settings
+from sqlalchemy import text
+from sqlalchemy.orm import Session
+from fastapi import Depends
 
 # Configure logging
 logging.basicConfig(
@@ -26,13 +32,33 @@ app = FastAPI(
 )
 
 # Enable CORS for frontend integration
+origins = [
+    "https://pulseshiftmap.netlify.app",
+    "https://yourdomain.com"
+]
+if settings.ENVIRONMENT != "production":
+    origins.extend([
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "http://localhost:3000",
+        "http://localhost:5173"
+    ])
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
+
+@app.get("/health")
+def health_check(db: Session = Depends(get_db)):
+    try:
+        db.execute(text("SELECT 1"))
+        return {"status": "healthy", "database": "connected"}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"status": "unhealthy", "error": str(e)})
 
 # Initialize Database on Startup
 @app.on_event("startup")

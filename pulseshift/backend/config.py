@@ -8,6 +8,10 @@ load_dotenv(dotenv_path=ENV_FILE)
 load_dotenv()
 
 class Settings(BaseSettings):
+    ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
+    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "fallback-secret-key")
+    
     YOUTUBE_API_KEY: str = os.getenv("YOUTUBE_API_KEY", "")
     NEWS_API_KEY: str = os.getenv("NEWS_API_KEY", "")
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")

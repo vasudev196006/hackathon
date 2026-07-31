@@ -35,5 +35,20 @@ async def chat_endpoint(req: ChatRequest, db: Session = Depends(get_db)):
         context_payload["topic_title"] = topic_title
 
     reply_text = await chatbot_service.generate_chat_response(message, context_payload)
+    
+    # Persist interaction log to database
+    from models import ChatbotLogModel
+    try:
+        log_entry = ChatbotLogModel(
+            conversation_id=req.conversation_id or "web-session",
+            user_query=message,
+            ai_response=reply_text,
+            model_used=chatbot_service.PRIMARY_MODEL
+        )
+        db.add(log_entry)
+        db.commit()
+    except Exception as e:
+        logger.error(f"Failed to log chatbot interaction: {e}")
+
     final_topic = context_payload.get("topic_title") or topic_title or "General"
     return ChatResponse(reply=reply_text, topic=final_topic)

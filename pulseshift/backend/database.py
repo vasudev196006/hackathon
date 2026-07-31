@@ -8,8 +8,15 @@ logger = logging.getLogger(__name__)
 
 DB_URL = settings.DATABASE_URL.strip() if settings.DATABASE_URL else ""
 
-if not DB_URL or "[YOUR-PASSWORD]" in DB_URL or "YOUR-PASSWORD" in DB_URL:
-    DB_URL = "sqlite:///./consensus_entropy.db"
+if settings.ENVIRONMENT == "production":
+    if not DB_URL or "[YOUR-PASSWORD]" in DB_URL or "YOUR-PASSWORD" in DB_URL:
+        raise ValueError(
+            "Production Database Error: A valid DATABASE_URL must be specified in the environment variables "
+            "when running in production. Fallback to SQLite is disabled."
+        )
+else:
+    if not DB_URL or "[YOUR-PASSWORD]" in DB_URL or "YOUR-PASSWORD" in DB_URL:
+        DB_URL = "sqlite:///./consensus_entropy.db"
 
 if DB_URL.startswith("postgres://"):
     DB_URL = DB_URL.replace("postgres://", "postgresql://", 1)

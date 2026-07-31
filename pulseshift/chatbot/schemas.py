@@ -7,6 +7,7 @@ class ChatRequest(BaseModel):
     topic_id: Optional[str] = Field(None, description="Topic unique identifier")
     history: Optional[List[Dict[str, Any]]] = Field(default_factory=list, description="Chat conversation history")
     context: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Live entropy & sentiment context payload")
+    conversation_id: Optional[str] = Field(None, description="Unique session conversation identifier")
 
 class ChatResponse(BaseModel):
     reply: str = Field(..., description="Generated Markdown response")
