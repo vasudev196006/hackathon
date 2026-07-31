@@ -6,11 +6,15 @@ from backend.models import Base
 
 logger = logging.getLogger(__name__)
 
-# Fallback in-memory DB if DATABASE_URL is not set or valid
-DB_URL = settings.DATABASE_URL.strip() if settings.DATABASE_URL else "sqlite:///./consensus_entropy.db"
+DB_URL = settings.DATABASE_URL.strip() if settings.DATABASE_URL else ""
+
+if not DB_URL or "[YOUR-PASSWORD]" in DB_URL or "YOUR-PASSWORD" in DB_URL:
+    DB_URL = "sqlite:///./consensus_entropy.db"
 
 if DB_URL.startswith("postgres://"):
     DB_URL = DB_URL.replace("postgres://", "postgresql://", 1)
+
+DB_URL = DB_URL.replace("?pgbouncer=true", "").replace("&pgbouncer=true", "")
 
 connect_args = {"check_same_thread": False} if DB_URL.startswith("sqlite") else {}
 

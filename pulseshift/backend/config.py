@@ -9,15 +9,19 @@ load_dotenv()
 
 class Settings(BaseSettings):
     YOUTUBE_API_KEY: str = os.getenv("YOUTUBE_API_KEY", "")
-    SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
-    SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "")
-    ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
-    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
     NEWS_API_KEY: str = os.getenv("NEWS_API_KEY", "")
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
     OPENROUTER_API_KEY: str = os.getenv("OPENROUTER_API_KEY", "")
     OPENROUTER_MODEL: str = os.getenv("OPENROUTER_MODEL", "tencent/hy3")
+    ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+    
+    SUPABASE_URL: str = os.getenv("SUPABASE_URL", "https://vdbafdrxznkiwcxbubsv.supabase.co")
+    SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "")
+    SUPABASE_PUBLISHABLE_KEY: str = os.getenv("SUPABASE_PUBLISHABLE_KEY", "sb_publishable_6Hjf9x5FufrtDsoU3P0QYw_U8UxqqfK")
+    SUPABASE_SECRET_KEY: str = os.getenv("SUPABASE_SECRET_KEY", "sb_secret_zYbSrcvbH3tv2BOm0Hnj7A_mhVR8ZdO")
     DATABASE_URL: str = os.getenv("DATABASE_URL", "")
+    DIRECT_URL: str = os.getenv("DIRECT_URL", "")
 
     # Configurable Entropy & Volatility Thresholds
     GENUINE_CONSENSUS_ENTROPY_MAX: float = 0.85
@@ -32,7 +36,8 @@ class Settings(BaseSettings):
 
     @property
     def has_supabase(self) -> bool:
-        return bool(self.SUPABASE_URL.strip() and self.SUPABASE_KEY.strip())
+        key = self.SUPABASE_KEY.strip() or self.SUPABASE_SECRET_KEY.strip()
+        return bool(self.SUPABASE_URL.strip() and key)
 
     @property
     def has_anthropic_key(self) -> bool:
