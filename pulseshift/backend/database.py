@@ -1,5 +1,5 @@
 import logging
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import sessionmaker
 from .config import settings
 from .models import Base
@@ -55,6 +55,47 @@ def init_db():
     try:
         Base.metadata.create_all(bind=engine)
         logger.info("Database tables initialized successfully.")
+        
+        # Self-healing database migration for missing columns
+        inspector = inspect(engine)
+        if "topics" in inspector.get_table_names():
+            columns = [col["name"] for col in inspector.get_columns("topics")]
+            missing_cols = []
+            
+            # search_query
+            if "search_query" not in columns:
+                if engine.url.drivername.startswith("sqlite"):
+                    missing_cols.append(("search_query", "TEXT"))
+                else:
+                    missing_cols.append(("search_query", "VARCHAR(255)"))
+            
+            # entropy_score
+            if "entropy_score" not in columns:
+                if engine.url.drivername.startswith("sqlite"):
+                    missing_cols.append(("entropy_score", "FLOAT"))
+                else:
+                    missing_cols.append(("entropy_score", "DOUBLE PRECISION"))
+            
+            # volatility_score
+            if "volatility_score" not in columns:
+                if engine.url.drivername.startswith("sqlite"):
+                    missing_cols.append(("volatility_score", "FLOAT"))
+                else:
+                    missing_cols.append(("volatility_score", "DOUBLE PRECISION"))
+                    
+            # consensus_status
+            if "consensus_status" not in columns:
+                if engine.url.drivername.startswith("sqlite"):
+                    missing_cols.append(("consensus_status", "TEXT"))
+                else:
+                    missing_cols.append(("consensus_status", "VARCHAR(100)"))
+            
+            if missing_cols:
+                logger.info(f"Adding missing columns to 'topics' table: {[c[0] for c in missing_cols]}...")
+                with engine.begin() as conn:
+                    for col_name, col_type in missing_cols:
+                        conn.execute(text(f"ALTER TABLE topics ADD COLUMN {col_name} {col_type}"))
+                logger.info("Successfully added missing columns to 'topics' table.")
     except Exception as e:
         logger.error(f"Failed to initialize database tables: {e}")
 
