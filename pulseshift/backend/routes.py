@@ -140,7 +140,8 @@ async def analyze_topic(req: AnalyzeRequest, db: Session = Depends(get_db)):
         topic_id=topic_record.id,
         entropy=metrics["entropy"],
         volatility=metrics["volatility"],
-        classification=classification_state
+        classification=classification_state,
+        created_at=datetime.utcnow()
     )
     db.add(snapshot)
     db.commit()
@@ -151,7 +152,8 @@ async def analyze_topic(req: AnalyzeRequest, db: Session = Depends(get_db)):
         topic_id=topic_id_str,
         entropy=metrics["entropy"],
         volatility=metrics["volatility"],
-        classification=classification_state
+        classification=classification_state,
+        snapshot_id=str(snapshot.id)
     )
 
     # Step 8: Generate AI Executive Summary text

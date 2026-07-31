@@ -1,5 +1,6 @@
 import logging
 import uuid
+from datetime import datetime
 from typing import Optional, Dict, Any, List
 from .config import settings
 
@@ -36,7 +37,12 @@ class SupabaseService:
             return None
         try:
             row_id = topic_id or str(uuid.uuid4())
-            res = self.client.table("topics").insert({"id": row_id, "title": title}).execute()
+            data = {
+                "id": row_id,
+                "title": title,
+                "created_at": datetime.utcnow().isoformat()
+            }
+            res = self.client.table("topics").insert(data).execute()
             return res.data[0] if res.data else None
         except Exception as e:
             logger.error(f"Supabase insert_topic error: {e}")
@@ -47,10 +53,13 @@ class SupabaseService:
             return []
         try:
             payload = []
+            now_iso = datetime.utcnow().isoformat()
             for v in videos:
                 item = dict(v)
                 if not item.get("id"):
                     item["id"] = str(uuid.uuid4())
+                if not item.get("created_at"):
+                    item["created_at"] = now_iso
                 payload.append(item)
             res = self.client.table("videos").insert(payload).execute()
             return res.data or []
@@ -63,10 +72,13 @@ class SupabaseService:
             return []
         try:
             payload = []
+            now_iso = datetime.utcnow().isoformat()
             for c in comments:
                 item = dict(c)
                 if not item.get("id"):
                     item["id"] = str(uuid.uuid4())
+                if not item.get("created_at"):
+                    item["created_at"] = now_iso
                 payload.append(item)
             res = self.client.table("comments").insert(payload).execute()
             return res.data or []
@@ -83,7 +95,8 @@ class SupabaseService:
                 "topic_id": topic_id,
                 "entropy": entropy,
                 "volatility": volatility,
-                "classification": classification
+                "classification": classification,
+                "created_at": datetime.utcnow().isoformat()
             }
             res = self.client.table("entropy_snapshots").insert(data).execute()
             return res.data[0] if res.data else None
@@ -96,10 +109,13 @@ class SupabaseService:
             return []
         try:
             payload = []
+            now_iso = datetime.utcnow().isoformat()
             for art in articles:
                 item = dict(art)
                 if not item.get("id"):
                     item["id"] = str(uuid.uuid4())
+                if not item.get("created_at"):
+                    item["created_at"] = now_iso
                 payload.append(item)
             res = self.client.table("news_articles").insert(payload).execute()
             return res.data or []
