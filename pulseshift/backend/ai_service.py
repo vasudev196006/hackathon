@@ -3,7 +3,7 @@ import logging
 import random
 import re
 from typing import List, Dict, Any, Optional
-from config import settings
+from .config import settings
 
 logger = logging.getLogger(__name__)
 

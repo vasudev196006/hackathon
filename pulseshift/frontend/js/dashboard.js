@@ -2,6 +2,8 @@
    Consensus Entropy Mapper - Dashboard Logic & Data Fetching
    ========================================================= */
 
+const API_BASE = "https://pluseshfit.onrender.com";
+
 let currentTopicData = null;
 let allCommentsData = [];
 
@@ -44,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadTopicsList() {
   try {
-    const res = await fetch('/topics');
+    const res = await fetch(`${API_BASE}/topics`);
     if (res.ok) {
       const topics = await res.json();
       const selector = document.getElementById('topic-selector');
@@ -66,7 +68,7 @@ async function loadTopicsList() {
 async function runAnalysis(topicTitle) {
   setLoadingState(true, topicTitle);
   try {
-    const res = await fetch('/analyze', {
+    const res = await fetch(`${API_BASE}/analyze`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ topic: topicTitle })
@@ -90,7 +92,7 @@ async function runAnalysis(topicTitle) {
 
 async function fetchTopicDetailsById(topicId) {
   try {
-    const res = await fetch(`/topic/${topicId}`);
+    const res = await fetch(`${API_BASE}/topic/${topicId}`);
     if (res.ok) {
       const data = await res.json();
       currentTopicData = data;

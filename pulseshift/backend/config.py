@@ -40,7 +40,7 @@ class Settings(BaseSettings):
 
     @property
     def has_supabase(self) -> bool:
-        key = self.SUPABASE_KEY.strip() or self.SUPABASE_SECRET_KEY.strip()
+        key = self.SUPABASE_KEY.strip() or self.SUPABASE_SECRET_KEY.strip() or self.SUPABASE_PUBLISHABLE_KEY.strip()
         return bool(self.SUPABASE_URL.strip() and key)
 
     @property

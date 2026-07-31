@@ -1,6 +1,7 @@
 import uuid
 import logging
 import asyncio
+from datetime import datetime
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -23,19 +24,18 @@ def parse_date(date_str: Optional[str]) -> Optional[datetime]:
         except Exception:
             return datetime.utcnow()
 
-from database import get_db
-from models import TopicModel, VideoModel, CommentModel, EntropySnapshotModel, NewsArticleModel
+from .database import get_db
+from .models import TopicModel, VideoModel, CommentModel, EntropySnapshotModel, NewsArticleModel
 
-# (Note: In routes.py imports, update import line for models)
-from schemas import TopicResponse, CommentResponse, EntropySnapshotResponse, DashboardMetrics, AnalyzeRequest, ChatRequest, ChatResponse
-from youtube_service import youtube_service
-from ai_service import ai_service
-from entropy_engine import EntropyEngine
-from classification import ConsensusClassifier
-from supabase_service import supabase_service
-from news_service import news_service, NewsServiceError
-from gemini_service import gemini_service
-from openrouter_service import openrouter_service
+from .schemas import TopicResponse, CommentResponse, EntropySnapshotResponse, DashboardMetrics, AnalyzeRequest, ChatRequest, ChatResponse
+from .youtube_service import youtube_service
+from .ai_service import ai_service
+from .entropy_engine import EntropyEngine
+from .classification import ConsensusClassifier
+from .supabase_service import supabase_service
+from .news_service import news_service, NewsServiceError
+from .gemini_service import gemini_service
+from .openrouter_service import openrouter_service
 
 logger = logging.getLogger(__name__)
 
@@ -84,11 +84,11 @@ async def analyze_topic(req: AnalyzeRequest, db: Session = Depends(get_db)):
         db.add(topic_record)
         db.commit()
         db.refresh(topic_record)
-        
-        # Mirror to Supabase if active
-        supabase_service.insert_topic(topic_title, topic_id=str(topic_record.id), search_query=topic_title)
-
     topic_id_str = str(topic_record.id)
+
+    if not existing_topic:
+        # Mirror to Supabase if active
+        supabase_service.insert_topic(topic_title, topic_id=topic_id_str, search_query=topic_title)
 
     # Step 2: Fetch YouTube videos & comments
     yt_data = youtube_service.fetch_videos_and_comments(topic_title, max_videos=10, max_comments_per_video=25)
@@ -157,7 +157,8 @@ async def analyze_topic(req: AnalyzeRequest, db: Session = Depends(get_db)):
         topic_id=topic_record.id,
         entropy=metrics["entropy"],
         volatility=metrics["volatility"],
-        classification=classification_state
+        classification=classification_state,
+        created_at=datetime.utcnow()
     )
     db.add(snapshot)
     

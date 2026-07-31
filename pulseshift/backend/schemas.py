@@ -10,7 +10,7 @@ class TopicCreate(BaseModel):
 class TopicResponse(BaseModel):
     id: UUID
     title: str
-    created_at: datetime
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -48,7 +48,7 @@ class CommentResponse(BaseModel):
     reason: Optional[str] = None
     emotion: Optional[str] = None
     confidence: Optional[float] = 0.0
-    created_at: datetime
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -60,7 +60,7 @@ class EntropySnapshotResponse(BaseModel):
     entropy: float
     volatility: float
     classification: str
-    created_at: datetime
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
