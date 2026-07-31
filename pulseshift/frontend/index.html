@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PulseShift | From public opinion to public confidence</title>
+  <meta name="description" content="AI-powered Shannon entropy and consensus volatility mapper analyzing public discussions and protest dynamics in real time.">
+  
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Chart.js CDN for live preview charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+
+  <!-- Hero Section (No Header / Navbar, Compact & Sleek) -->
+  <main class="hero-wrapper">
+    <!-- Background Image with Blend Mask -->
+    <div class="hero-bg-mask"></div>
+
+    <div class="hero-content-container">
+      
+      <!-- Top Brand Tag Pill (Replacing full header) -->
+      <div class="brand-pill-wrapper animate-fade-in delay-100">
+        <a href="/" class="brand-pill">
+          <div class="brand-icon-sm">
+            <i class="fa-solid fa-chart-nodes"></i>
+          </div>
+          <span class="brand-name">PulseShift</span>
+          <span class="brand-tag-dot"></span>
+          <span class="brand-tag-text">Consensus Intelligence</span>
+        </a>
+
+        <div class="header-quick-links">
+          <a href="/dashboard" class="quick-nav-link"><i class="fa-solid fa-desktop"></i> Full Workstation</a>
+          <a href="/docs" target="_blank" class="quick-nav-link"><i class="fa-solid fa-code"></i> API</a>
+        </div>
+      </div>
+
+      <div class="hero-grid">
+        
+        <!-- LEFT COLUMN -->
+        <div class="hero-left-col">
+          <!-- Main Headline -->
+          <h1 class="hero-title animate-fade-in delay-200">
+            From public opinion <br />
+            to <span class="gradient-text">public confidence.</span>
+          </h1>
+
+          <!-- Concise Subtitle -->
+          <p class="hero-subtitle animate-fade-in delay-300">
+            AI-powered Shannon entropy mapping and real-time consensus dynamics analyzing public commentary and protest trends.
+          </p>
+
+          <!-- Compact Search Form -->
+          <div class="animate-fade-in delay-400 search-cta-group">
+            <form id="hero-search-form" class="search-form">
+              <i class="fa-solid fa-magnifying-glass search-icon"></i>
+              <input 
+                type="text" 
+                id="topic-input" 
+                class="search-input" 
+                placeholder="Analyze topic or protest (e.g. Climate Action, AI Policy)..." 
+                required
+                autocomplete="off"
+              />
+              <button type="submit" id="search-btn" class="btn-primary">
+                <span>Analyze</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </form>
+          </div>
+
+          <!-- Quick Topic Chips -->
+          <div class="quick-topics animate-fade-in delay-400">
+            <span class="topic-label">Live Trending:</span>
+            <button class="chip" onclick="quickAnalyze('Climate Action Protests')">Climate Action</button>
+            <button class="chip" onclick="quickAnalyze('AI Regulation')">AI Regulation</button>
+            <button class="chip" onclick="quickAnalyze('Farmers Tech Rights')">Farmers Rights</button>
+            <button class="chip" onclick="quickAnalyze('Electric Vehicles')">EV Consensus</button>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN (Compact Live Card) -->
+        <div class="hero-right-col">
+          <div class="glass-card compact-stats-card animate-fade-in delay-500">
+            <div class="compact-card-header">
+              <div class="live-pill">
+                <span class="pulse-indicator">
+                  <span class="pulse-ring"></span>
+                  <span class="pulse-core"></span>
+                </span>
+                LIVE PROTEST FEED
+              </div>
+              <span class="card-time-tag">Updated 2m ago</span>
+            </div>
+
+            <!-- News Feed Stream inside Hero -->
+            <div class="hero-protest-news-box">
+              <div id="protest-news-list" class="hero-news-list">
+                <div class="news-loading-skeleton">
+                  <i class="fa-solid fa-spinner fa-spin"></i> Loading live protest news...
+                </div>
+              </div>
+            </div>
+
+            <!-- Mini KPI Summary -->
+            <div class="compact-kpi-footer">
+              <div class="compact-stat">
+                <span class="stat-val text-amber-400">78%</span>
+                <span class="stat-lbl">Consensus Stability</span>
+              </div>
+              <div class="compact-stat-divider"></div>
+              <div class="compact-stat">
+                <span class="stat-val">150+</span>
+                <span class="stat-lbl">Rallies Monitored</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Scroll Indicator Prompt -->
+      <div class="scroll-down-prompt animate-fade-in delay-500">
+        <a href="#workstation-section" class="scroll-link">
+          <span>Scroll to explore Live Workstation & Dynamics</span>
+          <i class="fa-solid fa-chevron-down animate-bounce"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- =========================================================
+       SCROLL-TO SECTION: EMBEDDED LIVE WORKSTATION & TABS
+       ========================================================= -->
+  <section id="workstation-section" class="workstation-preview-section">
+    <div class="section-container">
+      
+      <!-- Section Header -->
+      <div class="section-heading">
+        <div class="badge-pill">
+          <i class="fa-solid fa-bolt text-amber-400"></i> Real-Time Consensus Engine
+        </div>
+        <h2 class="section-title">Consensus Workstation & Opinion Analytics</h2>
+        <p class="section-sub">Explore opinion entropy math, live protest feeds, and automated consensus classification.</p>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="tabs-container">
+        <button class="tab-btn active" onclick="switchTab('tab-preview')">
+          <i class="fa-solid fa-chart-line"></i> Workstation KPI Summary
+        </button>
+        <button class="tab-btn" onclick="switchTab('tab-protest')">
+          <i class="fa-solid fa-bullhorn"></i> Live Protest Feed
+        </button>
+        <button class="tab-btn" onclick="switchTab('tab-engine')">
+          <i class="fa-solid fa-calculator"></i> Shannon Entropy Engine
+        </button>
+      </div>
+
+      <!-- TAB 1: WORKSTATION PREVIEW -->
+      <div id="tab-preview" class="tab-content active">
+        <div class="tab-kpi-grid">
+          <div class="glass-card tab-kpi-card">
+            <div class="kpi-icon-box bg-emerald"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="kpi-info">
+              <span class="kpi-lbl">Consensus State</span>
+              <span class="kpi-val text-emerald" id="preview-state">Genuine Consensus</span>
+              <span class="kpi-desc">Low Entropy H(P) = 0.42</span>
+            </div>
+          </div>
+
+          <div class="glass-card tab-kpi-card">
+            <div class="kpi-icon-box bg-cyan"><i class="fa-solid fa-calculator"></i></div>
+            <div class="kpi-info">
+              <span class="kpi-lbl">Shannon Entropy</span>
+              <span class="kpi-val" id="preview-entropy">0.42 / 1.0</span>
+              <span class="kpi-desc">Stance Information Dispersion</span>
+            </div>
+          </div>
+
+          <div class="glass-card tab-kpi-card">
+            <div class="kpi-icon-box bg-indigo"><i class="fa-solid fa-chart-line"></i></div>
+            <div class="kpi-info">
+              <span class="kpi-lbl">Sentiment Volatility</span>
+              <span class="kpi-val" id="preview-volatility">0.18</span>
+              <span class="kpi-desc">Standard Deviation Var(S)</span>
+            </div>
+          </div>
+
+          <div class="glass-card tab-kpi-card">
+            <div class="kpi-icon-box bg-amber"><i class="fa-solid fa-comments"></i></div>
+            <div class="kpi-info">
+              <span class="kpi-lbl">Comments Processed</span>
+              <span class="kpi-val" id="preview-comments">250</span>
+              <span class="kpi-desc">AI NLP Batch Analysis</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Call to Action Banner -->
+        <div class="glass-card workstation-cta-banner">
+          <div class="banner-content">
+            <h3>Ready to analyze custom topics or YouTube threads?</h3>
+            <p>Launch the full interactive workstation with Supabase Realtime synchronization and Chart.js analytics.</p>
+          </div>
+          <a href="/dashboard" class="btn-primary">
+            <span>Open Full Workstation</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- TAB 2: LIVE PROTEST FEED -->
+      <div id="tab-protest" class="tab-content">
+        <div class="glass-card protest-feed-full">
+          <div class="feed-header">
+            <h3><i class="fa-solid fa-newspaper text-cyan-400"></i> Global Protest & Demonstration Monitor</h3>
+            <span class="feed-badge">Live NewsAPI Sync</span>
+          </div>
+          <div id="tab-protest-news-grid" class="protest-grid">
+            <div class="news-loading-skeleton"><i class="fa-solid fa-spinner fa-spin"></i> Fetching live news articles...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: SHANNON ENTROPY MATH ENGINE -->
+      <div id="tab-engine" class="tab-content">
+        <div class="features-grid">
+          <div class="glass-card feature-card">
+            <div class="feature-icon"><i class="fa-solid fa-square-root-variable"></i></div>
+            <h3>Information Entropy Math</h3>
+            <p>Calculates exact Shannon Entropy \(H(P) = -\sum p_i \log_2(p_i)\) over comment stance distributions (`support`, `oppose`, `neutral`) to detect fragmentation.</p>
+          </div>
+
+          <div class="glass-card feature-card">
+            <div class="feature-icon"><i class="fa-solid fa-wave-square"></i></div>
+            <h3>Sentiment Volatility Variance</h3>
+            <p>Computes variance and standard deviation across sentiment scores to uncover volatile shift points before public consensus breaks down.</p>
+          </div>
+
+          <div class="glass-card feature-card">
+            <div class="feature-icon"><i class="fa-solid fa-brain"></i></div>
+            <h3>False Convergence AI</h3>
+            <p>Identifies cases where surface-level agreement hides deep divergence in underlying reasoning (facts vs values vs policy process).</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2026 PulseShift Consensus Entropy Mapper. Built with Python FastAPI, Supabase, Chart.js, and Anthropic Claude.</p>
+  </footer>
+
+  <script src="/static/js/main.js"></script>
+</body>
+</html>
