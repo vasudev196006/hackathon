@@ -15,7 +15,13 @@ class SupabaseService:
         if settings.has_supabase:
             try:
                 from supabase import create_client, Client
-                self.client: Optional[Client] = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+                url = settings.SUPABASE_URL.strip().rstrip('/')
+                if url.endswith('/rest/v1'):
+                    url = url[:-len('/rest/v1')].rstrip('/')
+                key = (settings.SUPABASE_KEY.strip() or 
+                       settings.SUPABASE_SECRET_KEY.strip() or 
+                       settings.SUPABASE_PUBLISHABLE_KEY.strip())
+                self.client: Optional[Client] = create_client(url, key)
                 logger.info("Supabase client initialized successfully.")
             except Exception as e:
                 logger.warning(f"Could not initialize Supabase client: {e}")
