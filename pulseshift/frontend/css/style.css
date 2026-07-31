@@ -137,9 +137,95 @@ body {
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
 }
 
-/* --- REMOVED NAVBAR / TOP HEADER --- */
+/* Navigation Bar Top Header (Liquid Glass & Capsule Navigation) */
 .navbar {
-  display: none ! baseline;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 2.5rem;
+  background: rgba(14, 16, 22, 0.75);
+  backdrop-filter: blur(28px) saturate(200%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: #ffffff;
+  padding: 0.4rem 1.1rem 0.4rem 0.45rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.03) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.brand:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.06) 100%);
+  border-color: rgba(255, 205, 117, 0.7);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45), 0 0 20px rgba(255, 205, 117, 0.25);
+  transform: translateY(-1px);
+}
+
+.brand-gradient {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.5rem 1.25rem;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.nav-link:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+/* Active Workstation / Capsule Navigation Pill */
+.nav-link.active, .nav-link.capsule-active {
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.04) 50%, rgba(255, 255, 255, 0.1) 100%);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 1.5px 1px rgba(255, 255, 255, 0.45), inset 0 -1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.nav-link.active:hover, .nav-link.capsule-active:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.16) 100%);
+  border-color: rgba(255, 205, 117, 0.75);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 205, 117, 0.3), inset 0 2px 2px #ffffff;
+  transform: translateY(-2px);
 }
 
 /* --- HERO WRAPPER & FULL 100VH LAYOUT --- */
