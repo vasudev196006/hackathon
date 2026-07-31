@@ -1,10 +1,10 @@
 import logging
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from database import get_db
-from models import TopicModel
-from chatbot.schemas import ChatRequest, ChatResponse
-from chatbot.service import chatbot_service
+from backend.database import get_db
+from backend.models import TopicModel
+from .schemas import ChatRequest, ChatResponse
+from .service import chatbot_service
 
 logger = logging.getLogger(__name__)
 

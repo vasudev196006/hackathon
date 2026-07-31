@@ -5,11 +5,11 @@ from pathlib import Path
 # Add backend directory to sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from config import settings
-from youtube_service import youtube_service
-from ai_service import ai_service
-from news_service import news_service
-from supabase_service import supabase_service
+from .config import settings
+from .youtube_service import youtube_service
+from .ai_service import ai_service
+from .news_service import news_service
+from .supabase_service import supabase_service
 
 def test_api_keys():
     print("=" * 50)

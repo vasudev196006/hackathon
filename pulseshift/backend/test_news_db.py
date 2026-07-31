@@ -4,9 +4,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import asyncio
 import uuid
-from database import SessionLocal, init_db
-from models import TopicModel, NewsArticleModel
-from news_service import news_service
+from .database import SessionLocal, init_db
+from .models import TopicModel, NewsArticleModel
+from .news_service import news_service
 
 def test_db_persistence():
     print("=== Initializing Database ===")

@@ -4,7 +4,7 @@ import urllib.parse
 import xml.etree.ElementTree as ET
 from typing import List, Dict, Any, Optional
 import httpx
-from config import settings
+from .config import settings
 
 logger = logging.getLogger(__name__)
 
