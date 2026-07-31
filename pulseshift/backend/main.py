@@ -6,8 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 
-from backend.database import init_db
-from backend.routes import router
+from database import init_db
+from routes import router
 from chatbot import chatbot_router
 
 # Configure logging
@@ -57,4 +57,4 @@ app.include_router(chatbot_router)
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("backend.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

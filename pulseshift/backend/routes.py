@@ -7,19 +7,19 @@ from fastapi.responses import HTMLResponse, FileResponse
 from sqlalchemy.orm import Session
 from pathlib import Path
 
-from backend.database import get_db
-from backend.models import TopicModel, VideoModel, CommentModel, EntropySnapshotModel, NewsArticleModel
+from database import get_db
+from models import TopicModel, VideoModel, CommentModel, EntropySnapshotModel, NewsArticleModel
 
 # (Note: In routes.py imports, update import line for models)
-from backend.schemas import TopicResponse, CommentResponse, EntropySnapshotResponse, DashboardMetrics, AnalyzeRequest, ChatRequest, ChatResponse
-from backend.youtube_service import youtube_service
-from backend.ai_service import ai_service
-from backend.entropy_engine import EntropyEngine
-from backend.classification import ConsensusClassifier
-from backend.supabase_service import supabase_service
-from backend.news_service import news_service, NewsServiceError
-from backend.gemini_service import gemini_service
-from backend.openrouter_service import openrouter_service
+from schemas import TopicResponse, CommentResponse, EntropySnapshotResponse, DashboardMetrics, AnalyzeRequest, ChatRequest, ChatResponse
+from youtube_service import youtube_service
+from ai_service import ai_service
+from entropy_engine import EntropyEngine
+from classification import ConsensusClassifier
+from supabase_service import supabase_service
+from news_service import news_service, NewsServiceError
+from gemini_service import gemini_service
+from openrouter_service import openrouter_service
 
 logger = logging.getLogger(__name__)
 

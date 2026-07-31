@@ -3,7 +3,7 @@ import logging
 import random
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
-from backend.config import settings
+from config import settings
 
 logger = logging.getLogger(__name__)
 

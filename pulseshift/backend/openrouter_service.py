@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, Any, Optional
 import httpx
-from backend.config import settings
+from config import settings
 
 logger = logging.getLogger("openrouter_service")
 
@@ -132,7 +132,7 @@ Generate a complete, intellectual, news-grounded Markdown response answering the
 
         # Fallback to Gemini if OpenRouter key is limited or unavailable
         try:
-            from backend.gemini_service import gemini_service
+            from gemini_service import gemini_service
             return await gemini_service.generate_chat_response(user_message, ctx)
         except Exception as g_err:
             logger.warning(f"Fallback to Gemini failed: {g_err}")

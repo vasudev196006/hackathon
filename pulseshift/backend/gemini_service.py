@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, Any, Optional
 import httpx
-from backend.config import settings
+from config import settings
 
 logger = logging.getLogger("gemini_service")
 
