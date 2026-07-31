@@ -2,6 +2,8 @@
    PulseShift - Compact Landing Page & Workstation Tabs Script
    ========================================================= */
 
+const API_BASE = "https://pluseshfit.onrender.com";
+
 document.addEventListener('DOMContentLoaded', () => {
   const searchForm = document.getElementById('hero-search-form');
   const topicInput = document.getElementById('topic-input');
@@ -68,7 +70,7 @@ async function loadProtestNewsFeed() {
   const gridContainer = document.getElementById('tab-protest-news-grid');
 
   try {
-    const res = await fetch('/news?q=protest');
+    const res = await fetch(`${API_BASE}/news?q=protest`);
     if (!res.ok) {
       throw new Error(`Server returned ${res.status}`);
     }

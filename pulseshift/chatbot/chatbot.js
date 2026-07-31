@@ -3,6 +3,8 @@
  * Source of Truth: design.md
  */
 
+const API_BASE = "https://pluseshfit.onrender.com";
+
 class PulseShiftChatbot {
   constructor() {
     this.modal = null;
@@ -147,7 +149,7 @@ class PulseShiftChatbot {
     this.messagesContainer.appendChild(typingDiv);
     this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
 
-    const apiUrl = '/chat';
+    const apiUrl = `${API_BASE}/chat`;
 
     try {
       const activeTopic = window.currentTopicData?.topic?.title || null;
