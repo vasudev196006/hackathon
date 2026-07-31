@@ -10,13 +10,15 @@ from backend.database import get_db
 from backend.models import TopicModel, VideoModel, CommentModel, EntropySnapshotModel, NewsArticleModel
 
 # (Note: In routes.py imports, update import line for models)
-from backend.schemas import TopicResponse, CommentResponse, EntropySnapshotResponse, DashboardMetrics, AnalyzeRequest
+from backend.schemas import TopicResponse, CommentResponse, EntropySnapshotResponse, DashboardMetrics, AnalyzeRequest, ChatRequest, ChatResponse
 from backend.youtube_service import youtube_service
 from backend.ai_service import ai_service
 from backend.entropy_engine import EntropyEngine
 from backend.classification import ConsensusClassifier
 from backend.supabase_service import supabase_service
 from backend.news_service import news_service, NewsServiceError
+from backend.gemini_service import gemini_service
+from backend.openrouter_service import openrouter_service
 
 logger = logging.getLogger(__name__)
 
@@ -374,10 +376,83 @@ async def search_news(q: Optional[str] = None, category: Optional[str] = None, c
             return await news_service.getTopHeadlines(country.strip())
         elif q and q.strip():
             return await news_service.searchNews(q.strip())
-        else:
-            return await news_service.searchNews("general")
     except NewsServiceError as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
     except Exception as e:
         logger.error(f"Unexpected error in /news endpoint: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/chat", response_model=ChatResponse)
+async def chat_endpoint(req: ChatRequest, db: Session = Depends(get_db)):
+    """
+    POST /chat
+    Google Gemini AI Chatbot endpoint for PulseShift.
+    Answers user queries with live database metrics, Shannon entropy math, stance breakdown, and media coverage.
+    """
+    message = req.message.strip() if req.message else ""
+    if not message:
+        raise HTTPException(status_code=400, detail="Message string cannot be empty.")
+
+    context_payload = dict(req.context) if req.context else {}
+    topic_title = req.topic_title or context_payload.get("topic_title")
+
+    # If topic_title is missing, fallback to latest analyzed topic in database
+    if not topic_title:
+        try:
+            latest_topic = db.query(TopicModel).order_by(TopicModel.created_at.desc()).first()
+            if latest_topic:
+                topic_title = latest_topic.title
+        except Exception:
+            pass
+
+    # If topic_title is provided but metrics are incomplete, auto-populate live data from DB
+    if topic_title and (not context_payload.get("entropy") or not context_payload.get("support_pct")):
+        try:
+            topic_record = db.query(TopicModel).filter(TopicModel.title.ilike(f"%{topic_title}%")).first()
+            if not topic_record:
+                topic_record = db.query(TopicModel).order_by(TopicModel.created_at.desc()).first()
+
+            if topic_record:
+                details = await get_topic_details(topic_record.id, db)
+                if isinstance(details, dict):
+                    context_payload["topic_title"] = topic_record.title
+                    context_payload["classification"] = details.get("state_classification", "Genuine Consensus")
+                    context_payload["entropy"] = details.get("entropy_score", 0.85)
+                    context_payload["volatility"] = details.get("volatility_index", 0.25)
+                    context_payload["support_pct"] = details.get("support_ratio", 65.0)
+                    context_payload["oppose_pct"] = details.get("oppose_ratio", 20.0)
+                    context_payload["neutral_pct"] = details.get("neutral_ratio", 15.0)
+                    context_payload["total_comments"] = len(details.get("comments", [])) or 50
+                    context_payload["reasons_breakdown"] = details.get("reason_breakdown", {})
+                    context_payload["support_comments"] = [c for c in details.get("comments", []) if c.get("stance") == "support"]
+                    context_payload["oppose_comments"] = [c for c in details.get("comments", []) if c.get("stance") == "oppose"]
+                    context_payload["news_articles"] = details.get("news", [])
+        except Exception as err:
+            logger.warning(f"Could not auto-populate Gemini topic metrics for '{topic_title}': {err}")
+
+    if topic_title:
+        context_payload["topic_title"] = topic_title
+    if req.topic_id:
+        context_payload["topic_id"] = req.topic_id
+
+    # Auto-fetch live news articles for intellectual news reference if empty
+    if topic_title and not context_payload.get("news_articles"):
+        try:
+            news_items = await news_service.searchNews(topic_title)
+            if isinstance(news_items, list):
+                context_payload["news_articles"] = news_items
+        except Exception as n_err:
+            logger.warning(f"Could not fetch news for topic '{topic_title}': {n_err}")
+
+    try:
+        reply_text = await openrouter_service.generate_chat_response(message, context_payload)
+        final_topic = context_payload.get("topic_title") or topic_title or "General"
+        return ChatResponse(reply=reply_text, topic=final_topic)
+    except Exception as e:
+        logger.error(f"Error handling /chat endpoint with OpenRouter: {e}", exc_info=True)
+        try:
+            reply_text = await gemini_service.generate_chat_response(message, context_payload)
+            final_topic = context_payload.get("topic_title") or topic_title or "General"
+            return ChatResponse(reply=reply_text, topic=final_topic)
+        except Exception as g_err:
+            raise HTTPException(status_code=500, detail=str(g_err))

@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
     NEWS_API_KEY: str = os.getenv("NEWS_API_KEY", "")
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    OPENROUTER_API_KEY: str = os.getenv("OPENROUTER_API_KEY", "")
+    OPENROUTER_MODEL: str = os.getenv("OPENROUTER_MODEL", "tencent/hy3")
     DATABASE_URL: str = os.getenv("DATABASE_URL", "")
 
     # Configurable Entropy & Volatility Thresholds
@@ -42,5 +45,13 @@ class Settings(BaseSettings):
     @property
     def has_news_api_key(self) -> bool:
         return bool(self.NEWS_API_KEY.strip())
+
+    @property
+    def has_gemini_key(self) -> bool:
+        return bool(self.GEMINI_API_KEY.strip())
+
+    @property
+    def has_openrouter_key(self) -> bool:
+        return bool(self.OPENROUTER_API_KEY.strip())
 
 settings = Settings()

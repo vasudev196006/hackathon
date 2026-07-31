@@ -95,3 +95,13 @@ class DashboardMetrics(BaseModel):
 
 class AnalyzeRequest(BaseModel):
     topic: str
+
+class ChatRequest(BaseModel):
+    message: str = Field(..., description="User query or prompt string")
+    topic_id: Optional[str] = Field(None, description="Optional topic UUID string")
+    topic_title: Optional[str] = Field(None, description="Optional topic title string")
+    context: Optional[dict] = Field(default_factory=dict, description="Optional context dictionary")
+
+class ChatResponse(BaseModel):
+    reply: str = Field(..., description="Gemini AI generated reply text (supports markdown)")
+    topic: Optional[str] = Field(None, description="Associated topic title")
