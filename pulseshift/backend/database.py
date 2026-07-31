@@ -18,10 +18,28 @@ else:
     if not DB_URL or "[YOUR-PASSWORD]" in DB_URL or "YOUR-PASSWORD" in DB_URL:
         DB_URL = "sqlite:///./consensus_entropy.db"
 
+import urllib.parse
+
 if DB_URL.startswith("postgres://"):
     DB_URL = DB_URL.replace("postgres://", "postgresql://", 1)
 
 DB_URL = DB_URL.replace("?pgbouncer=true", "").replace("&pgbouncer=true", "")
+
+# Auto-encode special characters (like @, #) in the password portion of the database URL
+if "://" in DB_URL:
+    protocol, rest = DB_URL.split("://", 1)
+    if "@" in rest:
+        at_idx = rest.rfind("@")
+        creds = rest[:at_idx]
+        host_port_db = rest[at_idx+1:]
+        if ":" in creds:
+            colon_idx = creds.find(":")
+            username = creds[:colon_idx]
+            password = creds[colon_idx+1:]
+            # Unquote and quote to safely encode password special characters
+            decoded_password = urllib.parse.unquote(password)
+            encoded_password = urllib.parse.quote(decoded_password)
+            DB_URL = f"{protocol}://{username}:{encoded_password}@{host_port_db}"
 
 connect_args = {"check_same_thread": False} if DB_URL.startswith("sqlite") else {}
 
