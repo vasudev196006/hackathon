@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consensus Entropy Mapper | AI Public Opinion Analytics</title>
+  <meta name="description" content="AI-powered Shannon entropy and consensus volatility mapper analyzing YouTube public discussions.">
+  
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="/" class="brand">
+      <div class="brand-icon">
+        <i class="fa-solid fa-chart-nodes"></i>
+      </div>
+      <span class="brand-gradient">Consensus Entropy Mapper</span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">Home</a>
+      <a href="/dashboard" class="nav-link">Live Workstation</a>
+      <a href="/docs" target="_blank" class="nav-link">API Docs</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <main>
+    <section class="hero-container">
+      <div class="badge-pill">
+        <i class="fa-solid fa-bolt"></i> Next-Gen Opinion Dynamics AI
+      </div>
+
+      <h1 class="hero-title">
+        Map Public Consensus with <span>Information Entropy</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        AI-powered consensus analysis from YouTube public discussions. Uncover false convergence, fragile consensus, and true agreement in real time.
+      </p>
+
+      <!-- Search Box Form -->
+      <div class="search-box-wrapper">
+        <form id="hero-search-form" class="search-form">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input 
+            type="text" 
+            id="topic-input" 
+            class="search-input" 
+            placeholder="Enter any topic (e.g. Electric Vehicles, Artificial Intelligence)..." 
+            required
+            autocomplete="off"
+          />
+          <button type="submit" id="search-btn" class="btn-analyze">
+            <span>Analyze</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </form>
+      </div>
+
+      <!-- Quick Topic Chips -->
+      <div class="quick-topics">
+        <span class="topic-label">Popular Topics:</span>
+        <button class="chip" onclick="quickAnalyze('Electric Vehicles')">Electric Vehicles</button>
+        <button class="chip" onclick="quickAnalyze('Artificial Intelligence')">Artificial Intelligence</button>
+        <button class="chip" onclick="quickAnalyze('Nuclear Energy')">Nuclear Energy</button>
+        <button class="chip" onclick="quickAnalyze('Remote Work')">Remote Work</button>
+        <button class="chip" onclick="quickAnalyze('Quantum Computing')">Quantum Computing</button>
+      </div>
+    </section>
+
+    <!-- Core Features Showcase -->
+    <section class="features-section">
+      <h2 class="section-title">Engineered for Information Dynamics</h2>
+      <div class="features-grid">
+        <div class="glass-card feature-card">
+          <div class="feature-icon"><i class="fa-solid fa-calculator"></i></div>
+          <h3>Shannon Entropy Math</h3>
+          <p>Calculates exact information entropy H(P) over stance probability distributions to measure opinion fragmentation.</p>
+        </div>
+
+        <div class="glass-card feature-card">
+          <div class="feature-icon"><i class="fa-solid fa-chart-line"></i></div>
+          <h3>Sentiment Volatility</h3>
+          <p>Measures variance across public sentiment scores to detect unstable shift points before consensus breaks down.</p>
+        </div>
+
+        <div class="glass-card feature-card">
+          <div class="feature-icon"><i class="fa-solid fa-brain"></i></div>
+          <h3>False Convergence AI</h3>
+          <p>Detects hidden disagreements where superficial stance agreement hides fundamental friction between underlying reasons.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Consensus Entropy Mapper. Built with Python FastAPI, Supabase, Chart.js, and Anthropic Claude.</p>
+  </footer>
+
+  <script src="/static/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workstation | Consensus Entropy Mapper</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Chart.js and Supabase Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="/" class="brand">
+      <div class="brand-icon">
+        <i class="fa-solid fa-chart-nodes"></i>
+      </div>
+      <span class="brand-gradient">Consensus Entropy Mapper</span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">Home</a>
+      <a href="/dashboard" class="nav-link active">Workstation</a>
+      <a href="/docs" target="_blank" class="nav-link">API Docs</a>
+    </div>
+  </nav>
+
+  <main class="dashboard-container">
+    <!-- Top Header -->
+    <header class="dash-header">
+      <div class="topic-meta">
+        <h1 id="topic-display-title">
+          <span>Loading Topic...</span>
+        </h1>
+        <div class="status-badge" id="live-status-badge">
+          <span class="status-dot"></span>
+          <span>Supabase Realtime Sync Active</span>
+        </div>
+      </div>
+
+      <div class="dash-actions">
+        <form id="dash-search-form" style="display: flex; gap: 0.5rem; align-items: center;">
+          <input 
+            type="text" 
+            id="dash-topic-input" 
+            class="topic-select" 
+            style="min-width: 220px;" 
+            placeholder="Enter topic (e.g. NEET Leak)..."
+            required
+          />
+          <button type="submit" class="btn-analyze" style="padding: 0.6rem 1.2rem;">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span>Analyze</span>
+          </button>
+        </form>
+        <select id="topic-selector" class="topic-select">
+          <option value="">Select History Topic...</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- KPI Summary Grid -->
+    <section class="kpi-grid">
+      <div class="glass-card kpi-card">
+        <div class="kpi-header">
+          <span>Videos Analyzed</span>
+          <i class="fa-brands fa-youtube kpi-icon"></i>
+        </div>
+        <div class="kpi-value" id="kpi-videos">0</div>
+        <div class="kpi-subtext">Top search results</div>
+      </div>
+
+      <div class="glass-card kpi-card">
+        <div class="kpi-header">
+          <span>Total Comments</span>
+          <i class="fa-solid fa-comments kpi-icon"></i>
+        </div>
+        <div class="kpi-value" id="kpi-comments">0</div>
+        <div class="kpi-subtext">Cleaned & analyzed</div>
+      </div>
+
+      <div class="glass-card kpi-card">
+        <div class="kpi-header">
+          <span>Support Ratio</span>
+          <i class="fa-solid fa-thumbs-up kpi-icon"></i>
+        </div>
+        <div class="kpi-value" id="kpi-support">0%</div>
+        <div class="kpi-subtext">Positive sentiment</div>
+      </div>
+
+      <div class="glass-card kpi-card">
+        <div class="kpi-header">
+          <span>Oppose Ratio</span>
+          <i class="fa-solid fa-thumbs-down kpi-icon"></i>
+        </div>
+        <div class="kpi-value" id="kpi-oppose">0%</div>
+        <div class="kpi-subtext">Negative sentiment</div>
+      </div>
+
+      <div class="glass-card kpi-card">
+        <div class="kpi-header">
+          <span>Neutral Ratio</span>
+          <i class="fa-solid fa-scale-balanced kpi-icon"></i>
+        </div>
+        <div class="kpi-value" id="kpi-neutral">0%</div>
+        <div class="kpi-subtext">Balanced / inquiring</div>
+      </div>
+
+      <div class="glass-card kpi-card">
+        <div class="kpi-header">
+          <span>Avg Confidence</span>
+          <i class="fa-solid fa-bullseye kpi-icon"></i>
+        </div>
+        <div class="kpi-value" id="kpi-confidence">0.0</div>
+        <div class="kpi-subtext">AI certainty score</div>
+      </div>
+
+      <div class="glass-card kpi-card">
+        <div class="kpi-header">
+          <span>Shannon Entropy</span>
+          <i class="fa-solid fa-calculator kpi-icon"></i>
+        </div>
+        <div class="kpi-value" id="kpi-entropy">0.00</div>
+        <div class="kpi-subtext">H(P) bits</div>
+      </div>
+
+      <div class="glass-card kpi-card">
+        <div class="kpi-header">
+          <span>Volatility</span>
+          <i class="fa-solid fa-wave-square kpi-icon"></i>
+        </div>
+        <div class="kpi-value" id="kpi-volatility">0.00</div>
+        <div class="kpi-subtext">Score variance std dev</div>
+      </div>
+
+      <div class="glass-card kpi-card">
+        <div class="kpi-header">
+          <span>Consensus State</span>
+          <i class="fa-solid fa-shield-halved kpi-icon"></i>
+        </div>
+        <div style="margin-top: 0.25rem;">
+          <span id="kpi-classification-badge" class="consensus-badge state-genuine">Calculating...</span>
+        </div>
+        <div class="kpi-subtext">Dynamics classification</div>
+      </div>
+    </section>
+
+    <!-- Executive AI Summary Box -->
+    <section class="glass-card ai-summary-card">
+      <div class="ai-summary-header">
+        <i class="fa-solid fa-wand-magic-sparkles ai-sparkle"></i>
+        <span>AI Consensus Executive Insight</span>
+      </div>
+      <p id="ai-summary-text" class="ai-summary-text">
+        Analyzing consensus dynamics and argument structures across public YouTube discussions...
+      </p>
+    </section>
+
+    <!-- Dynamic Charts Grid -->
+    <section class="charts-grid">
+      <div class="glass-card chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">
+            <i class="fa-solid fa-chart-pie" style="color: var(--accent-indigo);"></i>
+            <span>Stance Breakdown (Support / Oppose / Neutral)</span>
+          </h3>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="stanceChart"></canvas>
+        </div>
+      </div>
+
+      <div class="glass-card chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">
+            <i class="fa-solid fa-chart-bar" style="color: var(--accent-purple);"></i>
+            <span>Reason Categories (Facts vs Values vs Process)</span>
+          </h3>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="reasonChart"></canvas>
+        </div>
+      </div>
+
+      <div class="glass-card chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">
+            <i class="fa-solid fa-chart-line" style="color: var(--accent-cyan);"></i>
+            <span>Shannon Entropy over Time</span>
+          </h3>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="entropyChart"></canvas>
+        </div>
+      </div>
+
+      <div class="glass-card chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">
+            <i class="fa-solid fa-wave-square" style="color: var(--accent-rose);"></i>
+            <span>Sentiment Volatility over Time</span>
+          </h3>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="volatilityChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Related Real-time News Coverage Section (NewsAPI) -->
+    <section class="glass-card comments-card" style="margin-bottom: 2.5rem;">
+      <div class="comments-header">
+        <h3 class="chart-title">
+          <i class="fa-solid fa-newspaper" style="color: var(--accent-cyan);"></i>
+          <span>Related News Coverage (NewsAPI)</span>
+        </h3>
+        <span id="news-count-badge" class="topic-label">Searching NewsAPI...</span>
+      </div>
+      <div id="news-articles-container" class="news-grid">
+        <div style="text-align: center; color: var(--text-dim); padding: 2rem; grid-column: 1 / -1;">
+          Loading news articles...
+        </div>
+      </div>
+    </section>
+
+    <!-- Analyzed Comments Stream Table -->
+    <section class="glass-card comments-card">
+      <div class="comments-header">
+        <h3 class="chart-title">
+          <i class="fa-solid fa-list-check" style="color: var(--accent-emerald);"></i>
+          <span>Analyzed Public Comments</span>
+        </h3>
+        <div class="filter-pills">
+          <button class="filter-btn active" onclick="filterComments('all')">All</button>
+          <button class="filter-btn" onclick="filterComments('support')">Support</button>
+          <button class="filter-btn" onclick="filterComments('oppose')">Oppose</button>
+          <button class="filter-btn" onclick="filterComments('neutral')">Neutral</button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="comments-table">
+          <thead>
+            <tr>
+              <th>Author</th>
+              <th>Stance</th>
+              <th>Confidence</th>
+              <th>Reasoning</th>
+              <th>Emotion</th>
+              <th>Comment Text</th>
+            </tr>
+          </thead>
+          <tbody id="comments-table-body">
+            <tr>
+              <td colspan="6" style="text-align: center; color: var(--text-dim); padding: 2rem;">
+                No comments loaded yet. Select or analyze a topic above.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- JavaScript Modules -->
+  <script src="/static/js/charts.js"></script>
+  <script src="/static/js/dashboard.js"></script>
+</body>
+</html>
